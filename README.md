@@ -27,15 +27,7 @@ Os requisitos completos estão em [`MVP.md`](MVP.md); os conceitos do domínio e
 
 ## Estrutura
 
-```
-fatura-facil/
-├── backend/            # projeto Django
-│   ├── config/         # settings, urls
-│   ├── lancamentos/    # Fonte, Compra, Lancamento, estorno, visão mensal
-│   ├── recorrentes/    # Recorrente, RecorrenteValor, MesConsolidado
-│   └── importacao/     # LoteImportacao, LinhaImportada, parsers por banco
-└── frontend/           # app Angular
-```
+Monorepo com `backend/` (Django) e `frontend/` (Angular), que conversam só pela API em `/api/`. A estrutura detalhada e as convenções de código estão em [`CLAUDE.md`](CLAUDE.md#estrutura).
 
 ## Status
 
