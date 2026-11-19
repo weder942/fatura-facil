@@ -9,6 +9,11 @@ Requisitos do MVP. Os conceitos (competência, fonte, compra, lançamento, vigê
 - Tolerância para lançamentos suspeitos: **R$ 0,05** (configurável).
 - Sem painel/dashboard nem categorias no MVP: **só a visão mensal**.
 - Sem tarefas agendadas: qualquer automação acontece quando o sistema é acessado.
+- **Competência do cartão = mês do vencimento da fatura.** Compra com dia ≥ dia de fechamento vai para a fatura seguinte (o dia do fechamento já é o "melhor dia de compra").
+- **Consolidação preguiçosa com carência de 1 mês:** só são consolidados automaticamente os meses com pelo menos 2 meses de idade (em dezembro, consolida até outubro). Assim, contas variáveis e estornos que chegam no mês seguinte ainda encontram o mês aberto.
+- **Editar compra com parcelas confirmadas:** o restante (total − soma das confirmadas) é dividido entre as parcelas não confirmadas, com a sobra dos centavos na primeira delas.
+- **Fontes do tipo `conta`** entram no saldo junto com dinheiro.
+- **Deploy cedo:** uma versão mínima (login + uma tela) vai para o PythonAnywhere no fim do esqueleto da Fase 1, para descobrir cedo os problemas de estáticos, CSRF e limites do plano gratuito.
 
 ## Fora do MVP (próximas versões)
 
@@ -16,7 +21,23 @@ Categorias e painel de gastos, rateio e reembolso de terceiros, regras de apelid
 
 ---
 
+## Ordem de implementação
+
+1. Esqueleto (1.0) e autenticação (1.1), com deploy mínimo.
+2. Serviços de competência e parcelamento com testes primeiro (os critérios de aceite do 1.3 viram testes).
+3. Fontes (1.2), compras (1.3), visão mensal (1.4) e horizonte (1.5).
+4. Recorrentes (2.1) e importação do histórico (2.2) — a partir daqui dá para usar com dados reais.
+5. Consolidação (2.3) e estorno (2.4).
+6. Importação de faturas (Fase 3) e ajustes (Fase 4).
+
+---
+
 ## Fase 1 — Base
+
+### 1.0 Esqueleto e deploy mínimo
+- Projeto Django (`backend/`) com DRF, `pytest` + `pytest-django`, e app Angular (`frontend/`).
+- Django serve a API em `/api/` e o build do Angular como estáticos, na mesma origem.
+- Deploy no PythonAnywhere de uma versão com login e uma tela vazia. Anotar o passo a passo desde já em `docs/deploy.md`.
 
 ### 1.1 Autenticação
 - Login e logout com usuário do Django. Todas as rotas da API exigem autenticação.
@@ -28,22 +49,24 @@ Categorias e painel de gastos, rateio e reembolso de terceiros, regras de apelid
 
 ### 1.3 Compras e parcelamento
 - Lançamento manual de compra: fonte, data, descrição, valor total, nº de parcelas (padrão 1).
-- Para fonte do tipo cartão, a competência da 1ª parcela é calculada pela data e pelo dia de fechamento. O usuário pode alterar a competência da 1ª parcela manualmente.
+- Para fonte do tipo cartão, a competência da 1ª parcela é calculada pela data e pelo dia de fechamento: se o dia da compra for menor que o dia de fechamento, a compra entra na fatura que fecha naquele mês; senão, na que fecha no mês seguinte. A competência é o mês do **vencimento** dessa fatura (mesmo mês do fechamento se `dia_vencimento > dia_fechamento`, senão o mês seguinte). O usuário pode alterar a competência da 1ª parcela manualmente.
 - Para outras fontes, a competência é o mês da data.
 - O sistema gera os lançamentos (parcela k/n) em competências consecutivas.
 - Arredondamento: `valor_parcela = floor(total / n)` em centavos; a sobra vai para a 1ª parcela. A soma das parcelas é sempre igual ao total.
-- Editar uma compra (valor total, nº de parcelas, competência inicial) regera as parcelas que ainda não foram confirmadas por importação. Parcelas confirmadas não mudam.
+- Editar uma compra (valor total, nº de parcelas, competência inicial) regera as parcelas que ainda não foram confirmadas por importação. Parcelas confirmadas não mudam. O valor a distribuir é `total − soma das confirmadas`, dividido entre as não confirmadas com a mesma regra de arredondamento.
 - Excluir uma compra exclui seus lançamentos (pedir confirmação).
 - Também é possível editar o valor de uma parcela individual (para ajustar centavos).
 
 **Critérios de aceite**
 - R$ 416,00 em 3x → 138,68 / 138,66 / 138,66.
 - Compra em 10x a partir de 2026-12 gera competências de 2026-12 a 2027-09.
+- Cartão com fechamento dia 25 e vencimento dia 5: compra em 24/11 → competência 2026-12; compra em 25/11 → 2027-01.
+- R$ 300,00 em 3x com a 1/3 confirmada em 100,00; total editado para R$ 330,00 → 2/3 e 3/3 passam a 115,00.
 
 ### 1.4 Visão mensal
 - Tela principal: um mês por vez, com navegação para o mês anterior e o seguinte.
 - Blocos lado a lado, como na planilha: Rendimentos, Fixas, e um bloco por fonte, cada um com descrição, valor e indicação de parcela (`2/5`).
-- Resumo do mês: total de rendimentos, total de fixas, total por fonte, total de cartões, saldo (`rendimentos − fixas − dinheiro − cartões`).
+- Resumo do mês: total de rendimentos, total de fixas, total por fonte, total de cartões, saldo (`rendimentos − fixas − (dinheiro + contas) − cartões`).
 - Lançamentos importados aparecem destacados (cor de fundo na descrição), com um filtro "só do último lote".
 - Lançamentos suspeitos aparecem com outra marcação e uma ação para resolver.
 - Mês consolidado aparece como somente leitura, com a ação "Reabrir".
@@ -52,15 +75,9 @@ Categorias e painel de gastos, rateio e reembolso de terceiros, regras de apelid
 - Lista de meses navegáveis: do primeiro mês com dados até `max(dezembro do ano corrente, última competência com parcela)`.
 - Exemplo: última parcela em 2027-02 → horizonte até 2027-12. Última parcela em 2028-10 → horizonte até 2028-10.
 
-### 1.6 Importação do histórico
-- Comando de gerenciamento (`manage.py importar_planilha <arquivo.xlsx> --ano 2026`) que lê a planilha original e cria fontes, recorrentes e lançamentos.
-- Itens no formato "Nome NN/MM" (total/atual) viram parcela de uma compra; parcelas da mesma compra em meses diferentes são agrupadas pelo nome sem o sufixo e pelo valor (±R$ 0,05).
-- Ao final, imprime um relatório: quantos lançamentos por mês e fonte, e o que não conseguiu interpretar (ex.: linhas sem descrição).
-- Critério de aceite: o total por fonte e por mês após a importação bate com a planilha.
-
 ---
 
-## Fase 2 — Recorrentes, consolidação e estorno
+## Fase 2 — Recorrentes, histórico, consolidação e estorno
 
 ### 2.1 Recorrentes com vigência
 - CRUD de recorrentes: nome, grupo (`rendimento` ou `fixa`), sinal (crédito/débito), valor fixo ou variável, ativo.
@@ -70,13 +87,20 @@ Categorias e painel de gastos, rateio e reembolso de terceiros, regras de apelid
 - Recorrente **variável** (água, energia): usa o último valor informado como estimativa e mostra "valor real pendente" até o usuário informar o valor do mês.
 - Na visão mensal, é possível sobrescrever o valor de um recorrente só naquele mês.
 
-### 2.2 Consolidação de mês
+### 2.2 Importação do histórico
+- Depende dos recorrentes (2.1): a planilha traz rendimentos e fixas, que viram recorrentes.
+- Comando de gerenciamento (`manage.py importar_planilha <arquivo.xlsx> --ano 2026`) que lê a planilha original e cria fontes, recorrentes e lançamentos.
+- Itens no formato "Nome NN/MM" (total/atual) viram parcela de uma compra; parcelas da mesma compra em meses diferentes são agrupadas pelo nome sem o sufixo e pelo valor (±R$ 0,05).
+- Ao final, imprime um relatório: quantos lançamentos por mês e fonte, e o que não conseguiu interpretar (ex.: linhas sem descrição).
+- Critério de aceite: o total por fonte e por mês após a importação bate com a planilha.
+
+### 2.3 Consolidação de mês
 - Ação "Consolidar mês": grava os valores dos recorrentes daquele mês como lançamentos concretos e marca o mês como consolidado.
 - Mês consolidado não aceita criação, edição nem exclusão de lançamentos (a API retorna erro). "Reabrir" desfaz o bloqueio.
-- Consolidação preguiçosa: no primeiro acesso, meses anteriores ao mês corrente que ainda estejam abertos são consolidados automaticamente. O usuário vê um aviso de quais meses foram consolidados.
-- Critério de aceite: reajustar o salário a partir de um mês não altera meses já consolidados.
+- Consolidação preguiçosa: no primeiro acesso, meses com pelo menos 2 meses de idade (anteriores ao mês passado) que ainda estejam abertos são consolidados automaticamente. O mês passado continua aberto (carência para contas variáveis e estornos atrasados). O usuário vê um aviso de quais meses foram consolidados.
+- Critérios de aceite: reajustar o salário a partir de um mês não altera meses já consolidados. Primeiro acesso em 2026-12-10 consolida até 2026-10; 2026-11 continua aberto.
 
-### 2.3 Estorno
+### 2.4 Estorno
 - A partir de uma compra, ação "Estornar": total ou parcial, com a data do estorno.
 - **Total:** na competência do estorno, as parcelas restantes (dessa competência em diante) são movidas para ela e entra um lançamento de crédito com o valor total da compra. Não sobra parcela nos meses seguintes.
 - **Parcial:** entra um lançamento de crédito com o valor informado, ligado à compra. Parcelas não mudam.
@@ -122,7 +146,7 @@ Categorias e painel de gastos, rateio e reembolso de terceiros, regras de apelid
 ## Fase 4 — Ajustes do MVP
 - Edição em massa de descrições dos lançamentos de um lote (para trocar nomes do banco por nomes memoráveis).
 - Botão "Baixar backup" que entrega o arquivo SQLite (ou um `dumpdata` em JSON).
-- Deploy no PythonAnywhere documentado em `docs/deploy.md` (build do Angular, `collectstatic`, mapeamento de estáticos, variáveis de ambiente, onde fica o SQLite).
+- Deploy no PythonAnywhere completo e documentado em `docs/deploy.md` (build do Angular, `collectstatic`, mapeamento de estáticos, variáveis de ambiente, onde fica o SQLite).
 
 ## API (rascunho)
 
