@@ -1,0 +1,157 @@
+# MVP — fatura-facil
+
+Requisitos do MVP. Os conceitos (competência, fonte, compra, lançamento, vigência, consolidação, suspeito) estão definidos no `CLAUDE.md`.
+
+## Decisões já tomadas
+
+- Um único usuário, com login (sessão do Django).
+- Backend Django + DRF + SQLite; frontend Angular desde o início; deploy no PythonAnywhere gratuito, numa única aplicação.
+- Tolerância para lançamentos suspeitos: **R$ 0,05** (configurável).
+- Sem painel/dashboard nem categorias no MVP: **só a visão mensal**.
+- Sem tarefas agendadas: qualquer automação acontece quando o sistema é acessado.
+
+## Fora do MVP (próximas versões)
+
+Categorias e painel de gastos, rateio e reembolso de terceiros, regras de apelido aprendidas, exportação no layout da planilha, parsers de outros bancos além de Bradesco/Amazon.
+
+---
+
+## Fase 1 — Base
+
+### 1.1 Autenticação
+- Login e logout com usuário do Django. Todas as rotas da API exigem autenticação.
+- Usuário criado via `createsuperuser`; não há cadastro público.
+
+### 1.2 Fontes
+- CRUD de fontes: nome, tipo (`cartao`, `dinheiro`, `conta`), dia de fechamento e dia de vencimento (obrigatórios para cartão), ativo/inativo.
+- Fontes iniciais: Fixas não é fonte (são recorrentes). Fontes: Dinheiro, Nubank, Bradesco, Amazon.
+
+### 1.3 Compras e parcelamento
+- Lançamento manual de compra: fonte, data, descrição, valor total, nº de parcelas (padrão 1).
+- Para fonte do tipo cartão, a competência da 1ª parcela é calculada pela data e pelo dia de fechamento. O usuário pode alterar a competência da 1ª parcela manualmente.
+- Para outras fontes, a competência é o mês da data.
+- O sistema gera os lançamentos (parcela k/n) em competências consecutivas.
+- Arredondamento: `valor_parcela = floor(total / n)` em centavos; a sobra vai para a 1ª parcela. A soma das parcelas é sempre igual ao total.
+- Editar uma compra (valor total, nº de parcelas, competência inicial) regera as parcelas que ainda não foram confirmadas por importação. Parcelas confirmadas não mudam.
+- Excluir uma compra exclui seus lançamentos (pedir confirmação).
+- Também é possível editar o valor de uma parcela individual (para ajustar centavos).
+
+**Critérios de aceite**
+- R$ 416,00 em 3x → 138,68 / 138,66 / 138,66.
+- Compra em 10x a partir de 2026-12 gera competências de 2026-12 a 2027-09.
+
+### 1.4 Visão mensal
+- Tela principal: um mês por vez, com navegação para o mês anterior e o seguinte.
+- Blocos lado a lado, como na planilha: Rendimentos, Fixas, e um bloco por fonte, cada um com descrição, valor e indicação de parcela (`2/5`).
+- Resumo do mês: total de rendimentos, total de fixas, total por fonte, total de cartões, saldo (`rendimentos − fixas − dinheiro − cartões`).
+- Lançamentos importados aparecem destacados (cor de fundo na descrição), com um filtro "só do último lote".
+- Lançamentos suspeitos aparecem com outra marcação e uma ação para resolver.
+- Mês consolidado aparece como somente leitura, com a ação "Reabrir".
+
+### 1.5 Horizonte de projeção
+- Lista de meses navegáveis: do primeiro mês com dados até `max(dezembro do ano corrente, última competência com parcela)`.
+- Exemplo: última parcela em 2027-02 → horizonte até 2027-12. Última parcela em 2028-10 → horizonte até 2028-10.
+
+### 1.6 Importação do histórico
+- Comando de gerenciamento (`manage.py importar_planilha <arquivo.xlsx> --ano 2026`) que lê a planilha original e cria fontes, recorrentes e lançamentos.
+- Itens no formato "Nome NN/MM" (total/atual) viram parcela de uma compra; parcelas da mesma compra em meses diferentes são agrupadas pelo nome sem o sufixo e pelo valor (±R$ 0,05).
+- Ao final, imprime um relatório: quantos lançamentos por mês e fonte, e o que não conseguiu interpretar (ex.: linhas sem descrição).
+- Critério de aceite: o total por fonte e por mês após a importação bate com a planilha.
+
+---
+
+## Fase 2 — Recorrentes, consolidação e estorno
+
+### 2.1 Recorrentes com vigência
+- CRUD de recorrentes: nome, grupo (`rendimento` ou `fixa`), sinal (crédito/débito), valor fixo ou variável, ativo.
+- Cada recorrente tem uma lista de valores com vigência (`valor`, `a_partir_de` competência, `ate` opcional).
+- O valor de um recorrente em uma competência aberta é o valor da vigência mais recente com `a_partir_de ≤ competência`.
+- Reajuste: cadastrar um novo valor com `a_partir_de = X`. Todos os meses abertos ≥ X passam a mostrar o novo valor, sem editar mês a mês.
+- Recorrente **variável** (água, energia): usa o último valor informado como estimativa e mostra "valor real pendente" até o usuário informar o valor do mês.
+- Na visão mensal, é possível sobrescrever o valor de um recorrente só naquele mês.
+
+### 2.2 Consolidação de mês
+- Ação "Consolidar mês": grava os valores dos recorrentes daquele mês como lançamentos concretos e marca o mês como consolidado.
+- Mês consolidado não aceita criação, edição nem exclusão de lançamentos (a API retorna erro). "Reabrir" desfaz o bloqueio.
+- Consolidação preguiçosa: no primeiro acesso, meses anteriores ao mês corrente que ainda estejam abertos são consolidados automaticamente. O usuário vê um aviso de quais meses foram consolidados.
+- Critério de aceite: reajustar o salário a partir de um mês não altera meses já consolidados.
+
+### 2.3 Estorno
+- A partir de uma compra, ação "Estornar": total ou parcial, com a data do estorno.
+- **Total:** na competência do estorno, as parcelas restantes (dessa competência em diante) são movidas para ela e entra um lançamento de crédito com o valor total da compra. Não sobra parcela nos meses seguintes.
+- **Parcial:** entra um lançamento de crédito com o valor informado, ligado à compra. Parcelas não mudam.
+- Estorno não pode ser feito em competência consolidada.
+
+**Critério de aceite (caso real do Mercado Livre):** compra de R$ 474,05 em 5x de 94,81, 1/5 cobrada em novembro, estorno total com competência dezembro → dezembro tem 2/5, 3/5, 4/5, 5/5 (4 × 94,81) e um crédito de −474,05, efeito líquido −94,81; janeiro em diante não tem parcelas dessa compra.
+
+---
+
+## Fase 3 — Importação de faturas
+
+### 3.1 Fluxo
+1. Usuário envia um arquivo (PDF ou .xlsx/.csv), escolhe a **fonte** e confirma a **competência** sugerida.
+2. O sistema lê as linhas e mostra uma **prévia** classificando cada linha: `nova`, `existente`, `suspeita`, `ignorada`.
+3. O usuário revisa (pode mudar a classificação de suspeitas e editar descrições) e confirma.
+4. Só então os lançamentos são gravados, todos ligados ao lote de importação.
+
+### 3.2 Parsers
+- Um parser por formato/banco, com interface comum (`parse(arquivo) -> list[LinhaFatura]`), onde `LinhaFatura` tem data, descrição original, valor, parcela atual e total (se houver).
+- MVP: PDF do app Bradesco Cartões (cartão Bradesco Visa e cartão Amazon Mastercard; o PDF pode trazer mais de um cartão, cada um em seu bloco) e um importador genérico de .xlsx/.csv com mapeamento de colunas.
+- Linhas ignoradas: pagamentos e saldos (`PAGTO`, `SALDO ANTERIOR`, `PAGAMENTO RECEBIDO`) e totais.
+- Guardar o texto bruto de cada linha e o hash do arquivo.
+
+### 3.3 Deduplicação
+- **Parcela (k/n):** casar com a parcela k da compra existente na mesma fonte (pela descrição original ou por valor ±R$ 0,05 e mesmo n). Se casar, a linha é `existente` e o valor do banco substitui o previsto (parcela passa a `confirmada`). Se não existir compra, criar a compra com n parcelas a partir da competência de (k), gerando k..n; parcelas anteriores não são criadas.
+- **À vista:** comparar por multiconjunto na mesma fonte e competência: (data, valor). Duas linhas iguais na fatura só são `existente` se houver dois lançamentos iguais no sistema. Isso evita perder duas corridas de R$ 12,00 no mesmo dia.
+- **Suspeita:** sem casamento exato, mas existe lançamento na mesma fonte e competência com valor a até R$ 0,05 e ainda não casado. Usuário escolhe: vincular (é o mesmo), inserir (é outro) ou ignorar.
+- **Reimportação:** importar de novo a mesma fatura (ou uma versão mais nova da fatura em aberto) só gera como `nova` o que ainda não existe. Importar o mesmo arquivo duas vezes não cria nada.
+- **Créditos (valores negativos):** sugerir vínculo como estorno de uma compra existente (mesma fonte, descrição parecida); o usuário confirma.
+
+### 3.4 Relatório de faltas
+- Após a importação, listar parcelas previstas daquela fonte e competência que **não** vieram na fatura (ex.: parcela antecipada ou lançada em outro cartão). Não apagar nada automaticamente.
+
+### 3.5 Destaque
+- Lançamentos criados ou atualizados por importação ficam marcados com a origem e o lote; a visão mensal os destaca e permite filtrar por lote.
+
+**Critérios de aceite**
+- Importar o PDF de dezembro do Bradesco com as parcelas previstas já cadastradas: parcelas 2/3, 3/3 etc. saem como `existente`; Óculos 138,66 vs previsto 138,67 sai como `existente` (casou pela parcela) e o valor é atualizado.
+- Importar o mesmo PDF duas vezes: a segunda importação não cria nenhum lançamento.
+
+---
+
+## Fase 4 — Ajustes do MVP
+- Edição em massa de descrições dos lançamentos de um lote (para trocar nomes do banco por nomes memoráveis).
+- Botão "Baixar backup" que entrega o arquivo SQLite (ou um `dumpdata` em JSON).
+- Deploy no PythonAnywhere documentado em `docs/deploy.md` (build do Angular, `collectstatic`, mapeamento de estáticos, variáveis de ambiente, onde fica o SQLite).
+
+## API (rascunho)
+
+```
+POST   /api/auth/login/            POST /api/auth/logout/
+GET    /api/fontes/                 POST/PUT/DELETE
+GET    /api/compras/                POST/PUT/DELETE
+POST   /api/compras/{id}/estornar/
+PATCH  /api/lancamentos/{id}/
+GET    /api/meses/                  # horizonte: lista de competências e status
+GET    /api/meses/{YYYY-MM}/        # visão mensal completa com totais
+POST   /api/meses/{YYYY-MM}/consolidar/   POST .../reabrir/
+GET    /api/recorrentes/            POST/PUT/DELETE
+POST   /api/recorrentes/{id}/valores/
+POST   /api/importacoes/            # upload + prévia
+POST   /api/importacoes/{id}/confirmar/
+GET    /api/importacoes/{id}/faltas/
+GET    /api/backup/
+```
+
+## Modelo de dados (rascunho)
+
+| Model | Campos principais |
+|---|---|
+| `Fonte` | nome, tipo, dia_fechamento, dia_vencimento, ativa |
+| `Compra` | fonte, data, descricao_original, descricao, valor_total, n_parcelas, origem, lote |
+| `Lancamento` | compra, fonte, competencia, parcela, valor, tipo (`normal`, `estorno`, `recorrente`), status (`previsto`, `confirmado`), origem, lote, suspeito_de (FK opcional) |
+| `Recorrente` | nome, grupo, sinal, variavel, ativo |
+| `RecorrenteValor` | recorrente, valor, a_partir_de, ate |
+| `MesConsolidado` | competencia, consolidado_em |
+| `LoteImportacao` | fonte, competencia, arquivo_hash, nome_arquivo, criado_em |
+| `LinhaImportada` | lote, texto_bruto, data, descricao, valor, parcela, n_parcelas, classificacao, lancamento (FK opcional) |

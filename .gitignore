@@ -1,0 +1,60 @@
+# --- Dados pessoais (nunca versionar) ---
+# Banco SQLite com os lançamentos reais
+*.sqlite3
+*.sqlite3-journal
+db.sqlite3*
+# Faturas e planilhas reais usadas em importação/testes manuais
+*.pdf
+*.xlsx
+*.xls
+*.csv
+# Backups gerados pelo "Baixar backup"
+backups/
+*.dump.json
+# Uploads (media do Django)
+media/
+backend/media/
+
+# Fixtures de teste anonimizadas podem ser liberadas explicitamente:
+!**/tests/fixtures/**
+
+# --- Segredos / ambiente ---
+.env
+.env.*
+!.env.example
+
+# --- Python / Django ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+staticfiles/
+backend/staticfiles/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+*.log
+
+# --- Angular / Node ---
+node_modules/
+frontend/dist/
+frontend/.angular/
+dist/
+.angular/
+npm-debug.log*
+yarn-error.log*
+
+# --- Editores / SO ---
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# --- Claude Code (configuração local) ---
+.claude/settings.local.json
