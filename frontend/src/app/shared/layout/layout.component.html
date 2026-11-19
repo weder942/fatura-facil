@@ -1,0 +1,12 @@
+<mat-toolbar class="layout__barra">
+  <a routerLink="/" class="layout__titulo">Fatura Fácil</a>
+  <span class="layout__espaco"></span>
+  <span class="layout__usuario">{{ auth.usuario()?.username }}</span>
+  <button mat-icon-button type="button" (click)="sair()" aria-label="Sair" title="Sair">
+    <mat-icon>logout</mat-icon>
+  </button>
+</mat-toolbar>
+
+<main class="layout__conteudo">
+  <router-outlet />
+</main>

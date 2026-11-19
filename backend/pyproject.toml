@@ -1,0 +1,13 @@
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+exclude = [".git", ".venv", "venv", "__pycache__", "migrations", "staticfiles"]
+
+[tool.ruff.lint]
+# RUF012: atributos de classe do Django/DRF (permission_classes, Meta.fields…) são listas por convenção.
+ignore = ["D203", "W391", "RUF012"]
+extend-select = ["I"]
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401", "F403"]
+"config/settings/*.py" = ["F401", "F403", "F405"]

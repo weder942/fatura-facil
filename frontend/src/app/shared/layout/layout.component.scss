@@ -1,0 +1,17 @@
+.layout__titulo {
+  color: inherit;
+  text-decoration: none;
+}
+
+.layout__espaco {
+  flex: 1;
+}
+
+.layout__usuario {
+  font: var(--mat-sys-body-medium);
+  margin-right: 8px;
+}
+
+.layout__conteudo {
+  padding: 16px;
+}

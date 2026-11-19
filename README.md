@@ -29,9 +29,40 @@ Os requisitos completos estão em [`MVP.md`](MVP.md); os conceitos do domínio e
 
 Monorepo com `backend/` (Django) e `frontend/` (Angular), que conversam só pela API em `/api/`. A estrutura detalhada e as convenções de código estão em [`CLAUDE.md`](CLAUDE.md#estrutura).
 
+## Desenvolvimento local
+
+Pré-requisitos: [pyenv](https://github.com/pyenv/pyenv) com pyenv-virtualenv e [nvm](https://github.com/nvm-sh/nvm).
+
+```bash
+# Backend — http://localhost:8000
+cd backend
+pyenv virtualenv 3.12.13 3.12.13-fatura-facil   # uma vez; o .python-version ativa sozinho
+make setup-dev
+cp .env.example .env
+make migrate superuser
+make runserver
+
+# Frontend — http://localhost:4200 (repassa /api para o 8000)
+cd frontend
+nvm use          # Node 24, pelo .nvmrc
+npm ci
+npm start
+```
+
+Testes e qualidade:
+
+```bash
+cd backend && make test code-convention check   # pytest com cobertura mínima de 93%, ruff, flake8
+cd frontend && npm test -- --watch=false        # vitest
+```
+
+## Deploy
+
+PythonAnywhere (plano gratuito). Passo a passo em [`docs/deploy.md`](docs/deploy.md).
+
 ## Status
 
-Em planejamento. Instruções de instalação, execução e deploy serão adicionadas conforme o código for escrito.
+Fase 1.0 (esqueleto, autenticação e deploy mínimo) em andamento.
 
 ## Licença
 
