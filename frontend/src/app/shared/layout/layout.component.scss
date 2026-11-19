@@ -1,6 +1,24 @@
+.layout__barra {
+  // No Material 3 a toolbar usa a mesma cor da página; um tom de superfície
+  // e uma linha embaixo separam a barra do conteúdo.
+  background-color: var(--mat-sys-surface-container);
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
 .layout__titulo {
   color: inherit;
   text-decoration: none;
+  border-radius: 4px;
+
+  // Contorno de foco só na navegação por teclado, não depois de clique.
+  &:focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--mat-sys-primary);
+    outline-offset: 2px;
+  }
 }
 
 .layout__espaco {
