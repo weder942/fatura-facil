@@ -72,9 +72,17 @@ python manage.py createsuperuser
    application = get_wsgi_application()
    ```
 
-5. *Static files* (opcional; o WhiteNoise já serve, mas assim o servidor do PythonAnywhere entrega direto): URL `/static/` → `/home/weder/fatura-facil/backend/staticfiles`.
+5. *Static files* (opcional; o WhiteNoise já serve, mas assim o servidor do PythonAnywhere entrega direto): na tabela, clique em *Enter URL*, digite `/static/` e confirme com Enter; depois clique em *Enter path* na mesma linha, digite `/home/weder/fatura-facil/backend/staticfiles` e confirme. A pasta só existe depois do `collectstatic` do passo 3.
 6. *Security* → **Force HTTPS**: ligado.
 7. **Reload**.
+
+### 5. Conferir
+
+- `https://weder.pythonanywhere.com` abre o login; depois de entrar, a tela inicial mostra o usuário e continua logada após F5.
+- O admin (`https://weder.pythonanywhere.com/<DJANGO_ADMIN_URL>`) abre com estilo. Sem estilo = problema nos estáticos.
+- Se der erro: aba *Web* → *Error log*.
+
+Primeira instalação feita e validada assim em 2026-11-19.
 
 ## Atualizações
 

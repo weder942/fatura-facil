@@ -62,7 +62,7 @@ PythonAnywhere (plano gratuito). Passo a passo em [`docs/deploy.md`](docs/deploy
 
 ## Status
 
-Fase 1.0 (esqueleto, autenticação e deploy mínimo) em andamento.
+Fase 1.0 (esqueleto, autenticação e deploy mínimo) concluída e publicada em https://weder.pythonanywhere.com. Em andamento: serviços de competência e parcelamento.
 
 ## Licença
 
