@@ -1,0 +1,98 @@
+<header class="mes__cabecalho">
+  <div class="mes__navegacao">
+    <button
+      mat-icon-button
+      type="button"
+      [disabled]="!anterior()"
+      (click)="irPara(anterior()!)"
+      aria-label="Mês anterior"
+    >
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+
+    <mat-select
+      class="mes__seletor"
+      [value]="competencia()"
+      (selectionChange)="irPara($event.value)"
+      aria-label="Escolher mês"
+    >
+      @for (opcao of opcoes(); track opcao) {
+        <mat-option [value]="opcao">{{ opcao | competencia }}</mat-option>
+      }
+    </mat-select>
+
+    <button
+      mat-icon-button
+      type="button"
+      [disabled]="!seguinte()"
+      (click)="irPara(seguinte()!)"
+      aria-label="Mês seguinte"
+    >
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </div>
+
+  <button mat-flat-button type="button" (click)="novaCompra()">
+    <mat-icon>add</mat-icon>
+    Nova compra
+  </button>
+</header>
+
+@if (erro(); as mensagem) {
+  <p class="mes__erro" role="alert">{{ mensagem }}</p>
+}
+
+@if (visao(); as mes) {
+  <section class="mes__resumo" aria-label="Resumo do mês">
+    <div>
+      <span>Rendimentos</span><strong>{{ mes.resumo.total_rendimentos | currency }}</strong>
+    </div>
+    <div>
+      <span>Fixas</span><strong>{{ mes.resumo.total_fixas | currency }}</strong>
+    </div>
+    <div>
+      <span>Dinheiro e contas</span
+      ><strong>{{ mes.resumo.total_dinheiro_e_contas | currency }}</strong>
+    </div>
+    <div>
+      <span>Cartões</span><strong>{{ mes.resumo.total_cartoes | currency }}</strong>
+    </div>
+    <div class="mes__saldo" [class.mes__saldo--negativo]="negativo(mes.resumo.saldo)">
+      <span>Saldo</span><strong>{{ mes.resumo.saldo | currency }}</strong>
+    </div>
+  </section>
+
+  @if (mes.fontes.length) {
+    <section class="mes__blocos">
+      @for (bloco of mes.fontes; track bloco.fonte.id) {
+        <mat-card appearance="outlined" class="mes__bloco">
+          <mat-card-header>
+            <mat-card-title>{{ bloco.fonte.nome }}</mat-card-title>
+            <mat-card-subtitle>{{ bloco.total | currency }}</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            @for (lancamento of bloco.lancamentos; track lancamento.id) {
+              <button
+                type="button"
+                class="mes__lancamento"
+                [class.mes__lancamento--importado]="lancamento.origem === 'importacao'"
+                (click)="abrirLancamento(lancamento)"
+              >
+                <span class="mes__descricao">{{ lancamento.descricao }}</span>
+                <span class="mes__parcela">{{ lancamento.parcela }}</span>
+                <span class="mes__valor">{{ lancamento.valor | currency }}</span>
+              </button>
+            } @empty {
+              <p class="mes__vazio">Nenhum lançamento.</p>
+            }
+          </mat-card-content>
+        </mat-card>
+      }
+    </section>
+  } @else {
+    <p class="mes__vazio">
+      Nenhuma fonte cadastrada. <a routerLink="/fontes">Cadastre os cartões e o dinheiro</a> para
+      lançar compras.
+    </p>
+  }
+}

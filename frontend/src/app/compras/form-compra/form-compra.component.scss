@@ -1,0 +1,61 @@
+.form-compra {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: min(480px, 80vw);
+}
+
+.form-compra__linha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  mat-form-field {
+    flex: 1 1 180px;
+  }
+}
+
+.form-compra__parcelas h3 {
+  font: var(--mat-sys-title-small);
+  margin: 8px 0;
+}
+
+.form-compra__parcela {
+  display: grid;
+  grid-template-columns: 3.5rem 1fr 7rem 6rem;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+}
+
+.form-compra__valor-parcela {
+  font: inherit;
+  text-align: right;
+  padding: 4px 6px;
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+}
+
+.form-compra__status,
+.form-compra__dica {
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.form-compra__erro {
+  color: var(--mat-sys-error);
+}
+
+.form-compra__acoes {
+  display: flex;
+}
+
+.form-compra__espaco {
+  flex: 1;
+}
+
+.form-compra__excluir {
+  color: var(--mat-sys-error);
+}

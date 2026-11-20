@@ -1,5 +1,9 @@
 <mat-toolbar class="layout__barra">
   <a routerLink="/" class="layout__titulo">Fatura Fácil</a>
+  <nav class="layout__menu">
+    <a mat-button routerLink="/meses" routerLinkActive="layout__menu--ativo">Mês</a>
+    <a mat-button routerLink="/fontes" routerLinkActive="layout__menu--ativo">Fontes</a>
+  </nav>
   <span class="layout__espaco"></span>
   <span class="layout__usuario">{{ auth.usuario()?.username }}</span>
   <button mat-icon-button type="button" (click)="sair()" aria-label="Sair" title="Sair">

@@ -1,0 +1,60 @@
+<h2 mat-dialog-title>{{ fonte ? 'Editar fonte' : 'Nova fonte' }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="salvar()">
+  <mat-dialog-content class="form-fonte">
+    <mat-form-field>
+      <mat-label>Nome</mat-label>
+      <input matInput formControlName="nome" placeholder="Ex.: Bradesco 9241" />
+      <mat-hint>Só um apelido. Nunca o número do cartão.</mat-hint>
+      @if (form.controls.nome.hasError('required')) {
+        <mat-error>Informe o nome.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Tipo</mat-label>
+      <mat-select formControlName="tipo">
+        @for (tipo of tipos; track tipo.valor) {
+          <mat-option [value]="tipo.valor">{{ tipo.rotulo }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (eCartao() === 'cartao') {
+      <div class="form-fonte__dias">
+        <mat-form-field>
+          <mat-label>Dia de fechamento</mat-label>
+          <input matInput type="number" min="1" max="31" formControlName="dia_fechamento" />
+          @if (form.controls.dia_fechamento.invalid) {
+            <mat-error>Entre 1 e 31.</mat-error>
+          }
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Dia de vencimento</mat-label>
+          <input matInput type="number" min="1" max="31" formControlName="dia_vencimento" />
+          @if (form.controls.dia_vencimento.invalid) {
+            <mat-error>Entre 1 e 31.</mat-error>
+          }
+        </mat-form-field>
+      </div>
+    }
+
+    <mat-form-field>
+      <mat-label>Ordem na visão mensal</mat-label>
+      <input matInput type="number" min="0" formControlName="ordem" />
+    </mat-form-field>
+
+    @if (fonte) {
+      <mat-checkbox formControlName="ativa">Ativa</mat-checkbox>
+    }
+
+    @if (erro(); as mensagem) {
+      <p class="form-fonte__erro" role="alert">{{ mensagem }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" mat-dialog-close>Cancelar</button>
+    <button mat-flat-button type="submit" [disabled]="salvando()">Salvar</button>
+  </mat-dialog-actions>
+</form>

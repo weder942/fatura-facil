@@ -1,0 +1,19 @@
+.form-fonte {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: min(400px, 80vw);
+}
+
+.form-fonte__dias {
+  display: flex;
+  gap: 12px;
+
+  mat-form-field {
+    flex: 1;
+  }
+}
+
+.form-fonte__erro {
+  color: var(--mat-sys-error);
+}

@@ -1,0 +1,23 @@
+.fontes__cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  h1 {
+    font: var(--mat-sys-headline-small);
+  }
+}
+
+.fontes__tabela {
+  max-width: 900px;
+}
+
+.fontes__acoes {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.fontes__inativa {
+  opacity: 0.6;
+}

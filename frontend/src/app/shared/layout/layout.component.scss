@@ -21,6 +21,14 @@
   }
 }
 
+.layout__menu {
+  margin-left: 16px;
+}
+
+.layout__menu--ativo {
+  background: var(--mat-sys-secondary-container);
+}
+
 .layout__espaco {
   flex: 1;
 }

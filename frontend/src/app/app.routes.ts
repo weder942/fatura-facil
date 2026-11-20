@@ -1,17 +1,33 @@
 import { Routes } from '@angular/router';
 
 import { authGuard } from './core/guards/auth.guard';
-import { InicioComponent } from './inicio/inicio.component';
-import { LoginComponent } from './login/login.component';
 import { LayoutComponent } from './shared/layout/layout.component';
+import { competenciaAtual } from './shared/utils/competencia';
 
 export const routes: Routes = [
-  { path: 'login', component: LoginComponent, title: 'Entrar · Fatura Fácil' },
+  {
+    path: 'login',
+    loadComponent: () => import('./login/login.component').then((m) => m.LoginComponent),
+    title: 'Entrar · Fatura Fácil',
+  },
   {
     path: '',
     component: LayoutComponent,
     canActivate: [authGuard],
-    children: [{ path: '', component: InicioComponent, title: 'Fatura Fácil' }],
+    children: [
+      { path: '', pathMatch: 'full', redirectTo: () => `/meses/${competenciaAtual()}` },
+      {
+        path: 'meses/:competencia',
+        loadComponent: () =>
+          import('./meses/visao-mensal.component').then((m) => m.VisaoMensalComponent),
+        title: 'Mês · Fatura Fácil',
+      },
+      {
+        path: 'fontes',
+        loadComponent: () => import('./fontes/fontes.component').then((m) => m.FontesComponent),
+        title: 'Fontes · Fatura Fácil',
+      },
+    ],
   },
   { path: '**', redirectTo: '' },
 ];
