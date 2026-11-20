@@ -39,6 +39,33 @@ html {
       on-error: #ffffff,
     )
   );
+
+  // O fundo da página é preto puro; diálogos e menus sobem para o cinza
+  // secundário do what-is-the-price (#1F201B) para não se fundirem com ele.
+  @include mat.dialog-overrides(
+    (
+      container-color: var(--mat-sys-surface-container),
+    )
+  );
+
+  // Campos preenchidos em cinza neutro (sem isso o tema usa surface-variant,
+  // que a paleta laranja deixa marrom).
+  @include mat.form-field-overrides(
+    (
+      filled-container-color: var(--mat-sys-surface-container-highest),
+    )
+  );
+}
+
+// Escurece e desfoca o que fica atrás do diálogo e dá uma borda ao diálogo,
+// para ele se destacar do fundo preto.
+.cdk-overlay-dark-backdrop {
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(2px);
+}
+
+.mat-mdc-dialog-surface {
+  border: 1px solid var(--mat-sys-outline-variant);
 }
 
 body {
