@@ -41,3 +41,18 @@ def test_parcela_unica_por_compra():
         Lancamento.objects.create(
             compra=compra, fonte=compra.fonte, competencia=date(2027, 1, 1), parcela=1, valor=Decimal("1.00")
         )
+
+
+def test_lancamento_sem_compra_usa_o_texto():
+    from datetime import date
+    from decimal import Decimal
+
+    from fatura_facil.models import Lancamento
+    from fatura_facil.tests.factories import FonteFactory
+
+    credito = Lancamento(
+        fonte=FonteFactory.build(), competencia=date(2026, 11, 1), valor=Decimal("-290.09"), texto="Estorno"
+    )
+
+    assert credito.descricao == "Estorno"
+    assert credito.parcela_formatada == ""

@@ -104,6 +104,18 @@ Primeira instalação feita e validada assim em 2026-11-19.
    ```
    Depois disso, basta rodar `atualizar-fatura`.
 
+## Importar o histórico da planilha
+
+1. Cadastre as fontes pela tela (cartões com fechamento e vencimento): uma por coluna da planilha (Nubank, Bradesco, Inter, Amazon, Dinheiro).
+2. Na aba *Files*, envie as planilhas para `~/fatura-facil-dados/` (fora do repositório; não versione).
+3. No console Bash:
+   ```bash
+   cd ~/fatura-facil/backend && workon fatura-facil
+   export DJANGO_SETTINGS_MODULE=config.settings.production
+   python manage.py importar_planilha ~/fatura-facil-dados/"Contas 2025.xlsx" ~/fatura-facil-dados/"contas 2026.xlsx" --simular
+   ```
+   Confira o relatório (os totais precisam bater) e rode de novo sem `--simular` para gravar.
+
 ## Manutenção do plano gratuito
 
 - **A aplicação expira a cada 3 meses** sem renovação: aba *Web* → *Run until 3 months from today*. O PythonAnywhere avisa por e-mail antes.

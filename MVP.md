@@ -98,6 +98,13 @@ Categorias e painel de gastos, rateio e reembolso de terceiros, regras de apelid
 - Itens no formato "Nome NN/MM" (total/atual) viram parcela de uma compra; parcelas da mesma compra em meses diferentes são agrupadas pelo nome sem o sufixo e pelo valor (±R$ 0,05).
 - Ao final, imprime um relatório: quantos lançamentos por mês e fonte, e o que não conseguiu interpretar (ex.: linhas sem descrição).
 - Critério de aceite: o total por fonte e por mês após a importação bate com a planilha.
+- **Decisões da implementação (2026-11-20):**
+  - Escopo: planilhas de 2025 e 2026 (`importar_planilha "Contas 2025.xlsx" "contas 2026.xlsx"`); o ano vem do nome do arquivo.
+  - As colunas são achadas pelo **cabeçalho** (linha 1), não pela posição: o layout mudou ao longo dos anos. Os blocos de totais ("Despesas", "Totais Despesas") são ignorados; "Em dinheiro" vai para a fonte "Dinheiro"; outros nomes com `--fonte "Coluna=Fonte"`. As fontes precisam estar cadastradas antes (cartões com fechamento e vencimento).
+  - Rendimentos e fixas: vira recorrente o nome que aparece em 3+ meses seguidos; mudanças que se mantêm viram vigências, mudanças que voltam no mês seguinte viram ajuste do mês; meses isolados viram valor do mês. O resto (reembolsos esporádicos, férias) vira avulso. As duas "Mãe" do mês são "Mãe saúde" (a 1ª) e "Mãe" (a 2ª); "Psiquiatria" e "Psiquiatra" são o mesmo recorrente.
+  - Parcelas: casam pela mesma compra quando têm o mesmo total, parcela anterior no mês anterior e mesmo nome com valor parecido (até R$ 1,00 ou 2%), ou nome diferente com valor até R$ 0,05. Compras já em andamento ficam só com as parcelas da planilha (não é possível regerar as parcelas delas pelo formulário); as que continuam depois do último mês da planilha são projetadas com o valor da última parcela.
+  - Valores negativos (estornos, descontos, "balanco") viram lançamento de crédito sem compra, com a descrição da planilha.
+  - O relatório lista os totais que não batem e os pontos de atenção (valor sem descrição, texto sem valor, parcelas sem continuação). `--simular` mostra o relatório sem gravar; `--substituir` apaga só o que veio da planilha e importa de novo.
 
 ### 2.3 Consolidação de mês
 - Ação "Consolidar mês": grava os valores dos recorrentes daquele mês como lançamentos concretos e marca o mês como consolidado.

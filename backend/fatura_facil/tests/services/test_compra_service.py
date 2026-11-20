@@ -204,3 +204,28 @@ class TestValorDaPrimeiraParcela:
         CompraService().atualizar(compra, valor_total=D("330.00"))
 
         assert [p[2] for p in _parcelas(compra)] == [D("110.00"), D("110.00"), D("110.00")]
+
+
+def test_compra_importada_incompleta_nao_regera_parcelas():
+    from fatura_facil.models import Compra, Lancamento
+    from fatura_facil.tests.factories import FonteFactory
+
+    fonte = FonteFactory()
+    compra = Compra.objects.create(
+        fonte=fonte,
+        data=date(2026, 5, 1),
+        descricao="Ipad",
+        valor_total=Decimal("199.99"),
+        n_parcelas=10,
+        competencia_inicial=date(2026, 5, 1),
+        origem="planilha",
+    )
+    Lancamento.objects.create(
+        compra=compra, fonte=fonte, competencia=date(2026, 12, 1), parcela=8, valor=Decimal("199.99")
+    )
+
+    with pytest.raises(RegraDeNegocioError, match="sem as primeiras parcelas"):
+        CompraService().atualizar(compra, valor_total=Decimal("300.00"))
+
+    CompraService().atualizar(compra, descricao="iPad")
+    assert compra.descricao == "iPad"

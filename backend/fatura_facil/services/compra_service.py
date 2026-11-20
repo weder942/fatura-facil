@@ -100,6 +100,8 @@ class CompraService:
             raise RegraDeNegocioError(f"A fonte {nova_fonte.nome} está inativa.")
 
         valor_primeira = alteracoes.pop("valor_primeira_parcela", None)
+        # Compra importada já em andamento (ex.: 8/10 na planilha) não tem as primeiras parcelas.
+        incompleta = self._normais(compra).count() < compra.n_parcelas
         data_mudou = "data" in alteracoes and alteracoes["data"] != compra.data
         antes = (compra.valor_total, compra.n_parcelas, compra.competencia_inicial)
 
@@ -110,6 +112,10 @@ class CompraService:
 
         depois = (compra.valor_total, compra.n_parcelas, compra.competencia_inicial)
         if fonte_mudou or antes != depois or valor_primeira is not None:
+            if incompleta:
+                raise RegraDeNegocioError(
+                    "Esta compra foi importada sem as primeiras parcelas. Ajuste o valor parcela a parcela."
+                )
             parcelas = redistribuir_parcelas(
                 compra.valor_total,
                 compra.n_parcelas,

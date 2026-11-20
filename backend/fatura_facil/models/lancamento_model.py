@@ -25,6 +25,9 @@ class Lancamento(models.Model):
     competencia = models.DateField(db_index=True, help_text="Primeiro dia do mês.")
     parcela = models.PositiveSmallIntegerField(null=True, blank=True)
     valor = models.DecimalField(max_digits=12, decimal_places=2)
+    texto = models.CharField(
+        max_length=200, blank=True, help_text="Descrição de lançamento sem compra (ex.: estorno da planilha)."
+    )
     tipo = models.CharField(max_length=10, choices=Tipo.choices, default=Tipo.NORMAL)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.PREVISTO)
     origem = models.CharField(max_length=12, choices=Origem.choices, default=Origem.MANUAL)
@@ -47,7 +50,7 @@ class Lancamento(models.Model):
 
     @property
     def descricao(self) -> str:
-        return self.compra.descricao if self.compra_id else ""
+        return self.compra.descricao if self.compra_id else self.texto
 
     @property
     def parcela_formatada(self) -> str:
