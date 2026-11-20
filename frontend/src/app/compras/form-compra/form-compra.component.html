@@ -50,7 +50,7 @@
     >
 
     <div class="form-compra__linha">
-      <mat-form-field>
+      <mat-form-field floatLabel="always">
         <mat-label>{{ parcelada() ? 'Valor total' : 'Valor' }}</mat-label>
         <span matTextPrefix>R$&nbsp;</span>
         <input matInput formControlName="valor_total" inputmode="decimal" placeholder="0,00" />
@@ -71,10 +71,10 @@
     </div>
 
     @if (parcelada()) {
-      <mat-form-field>
+      <mat-form-field floatLabel="always">
         <mat-label>Valor da 1ª parcela</mat-label>
         <span matTextPrefix>R$&nbsp;</span>
-        <input matInput formControlName="valor_primeira" inputmode="decimal" />
+        <input matInput formControlName="valor_primeira" inputmode="decimal" placeholder="0,00" />
         @if (form.controls.valor_primeira.disabled) {
           <mat-hint>Confirmada pela fatura.</mat-hint>
         } @else if (demaisParcelas(); as demais) {
