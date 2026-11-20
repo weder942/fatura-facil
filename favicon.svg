@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Fatura Fácil: cartão laranja (#FF9052) com tarja e parcelas, sobre o cinza do tema -->
+  <rect width="64" height="64" rx="14" fill="#1F201B"/>
+  <rect x="8" y="15" width="48" height="34" rx="6" fill="#FF9052"/>
+  <rect x="8" y="22" width="48" height="7" fill="#000000"/>
+  <rect x="14" y="36" width="8" height="6" rx="1.5" fill="#000000"/>
+  <rect x="25" y="36" width="8" height="6" rx="1.5" fill="#000000"/>
+  <rect x="36" y="36" width="8" height="6" rx="1.5" fill="#000000" fill-opacity="0.35"/>
+</svg>
