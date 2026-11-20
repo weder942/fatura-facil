@@ -97,6 +97,13 @@ Primeira instalação feita e validada assim em 2026-11-19.
    ```
    Faz `git pull` dos dois clones, `pip install`, `migrate`, `collectstatic`, `check --deploy` e recarrega a aplicação.
 
+   Atalho (configurado uma vez no console do PythonAnywhere):
+   ```bash
+   echo "alias atualizar-fatura='~/fatura-facil/scripts/atualizar-servidor.sh'" >> ~/.bashrc
+   source ~/.bashrc
+   ```
+   Depois disso, basta rodar `atualizar-fatura`.
+
 ## Manutenção do plano gratuito
 
 - **A aplicação expira a cada 3 meses** sem renovação: aba *Web* → *Run until 3 months from today*. O PythonAnywhere avisa por e-mail antes.
