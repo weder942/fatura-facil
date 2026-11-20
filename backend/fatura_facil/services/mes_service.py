@@ -4,7 +4,8 @@ from decimal import Decimal
 
 from django.db.models import Q
 
-from fatura_facil.models import Fonte, Lancamento
+from fatura_facil.models import Fonte, Grupo, Lancamento
+from fatura_facil.services.recorrente_service import ItemDoMes, RecorrenteService
 
 __all__ = ["BlocoDaFonte", "MesService", "ResumoDoMes", "VisaoDoMes"]
 
@@ -38,9 +39,8 @@ class VisaoDoMes:
     competencia: date
     fontes: list[BlocoDaFonte]
     resumo: ResumoDoMes
-    # Rendimentos e fixas vêm dos recorrentes (Fase 2); por enquanto, vazios.
-    rendimentos: list = field(default_factory=list)
-    fixas: list = field(default_factory=list)
+    rendimentos: list[ItemDoMes] = field(default_factory=list)
+    fixas: list[ItemDoMes] = field(default_factory=list)
 
 
 class MesService:
@@ -60,12 +60,18 @@ class MesService:
         total_cartoes = sum((b.total for b in blocos.values() if b.fonte.e_cartao), ZERO)
         total_outros = sum((b.total for b in blocos.values() if not b.fonte.e_cartao), ZERO)
 
+        recorrentes = RecorrenteService()
+        rendimentos = recorrentes.itens_do_mes(Grupo.RENDIMENTO, competencia)
+        fixas = recorrentes.itens_do_mes(Grupo.FIXA, competencia)
+
         return VisaoDoMes(
             competencia=competencia,
             fontes=list(blocos.values()),
+            rendimentos=rendimentos,
+            fixas=fixas,
             resumo=ResumoDoMes(
-                total_rendimentos=ZERO,
-                total_fixas=ZERO,
+                total_rendimentos=sum((item.valor for item in rendimentos), ZERO),
+                total_fixas=sum((item.valor for item in fixas), ZERO),
                 total_dinheiro_e_contas=total_outros,
                 total_cartoes=total_cartoes,
             ),

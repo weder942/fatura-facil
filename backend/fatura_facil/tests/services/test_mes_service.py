@@ -3,9 +3,10 @@ from decimal import Decimal
 
 import pytest
 
+from fatura_facil.models import Avulso, Grupo
 from fatura_facil.services.compra_service import CompraService
 from fatura_facil.services.mes_service import MesService
-from fatura_facil.tests.factories import FonteFactory, criar_compra
+from fatura_facil.tests.factories import FonteFactory, criar_compra, criar_recorrente
 
 pytestmark = pytest.mark.django_db
 D = Decimal
@@ -73,3 +74,20 @@ def test_parcela_ajustada_reflete_no_total():
     CompraService().ajustar_parcela(compra.lancamentos.get(), D("99.90"))
 
     assert MesService().visao(NOVEMBRO).fontes[0].total == D("99.90")
+
+
+def test_rendimentos_e_fixas_entram_no_resumo():
+    criar_recorrente(nome="Salário", grupo=Grupo.RENDIMENTO, valor=D("8000.00"), ordem=1)
+    criar_recorrente(nome="INSS", grupo=Grupo.RENDIMENTO, valor=D("-900.00"), ordem=2)
+    criar_recorrente(nome="Aluguel", grupo=Grupo.FIXA, valor=D("1277.99"))
+    Avulso.objects.create(grupo=Grupo.FIXA, competencia=NOVEMBRO, descricao="Docs moto", valor=D("80.00"))
+    dinheiro = FonteFactory()
+    criar_compra(fonte=dinheiro, data=date(2026, 11, 10), valor_total=D("100.00"))
+
+    visao = MesService().visao(NOVEMBRO)
+
+    assert [i.descricao for i in visao.rendimentos] == ["Salário", "INSS"]
+    assert [i.descricao for i in visao.fixas] == ["Aluguel", "Docs moto"]
+    assert visao.resumo.total_rendimentos == D("7100.00")
+    assert visao.resumo.total_fixas == D("1357.99")
+    assert visao.resumo.saldo == D("5642.01")

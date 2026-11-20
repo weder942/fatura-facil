@@ -2,6 +2,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from fatura_facil.views import (
+    AvulsoViewSet,
     CompraViewSet,
     CsrfView,
     FonteViewSet,
@@ -10,6 +11,7 @@ from fatura_facil.views import (
     LogoutView,
     MesViewSet,
     MeView,
+    RecorrenteViewSet,
 )
 
 app_name = "fatura_facil"
@@ -20,6 +22,8 @@ router.register("fontes", FonteViewSet, basename="fonte")
 router.register("compras", CompraViewSet, basename="compra")
 router.register("lancamentos", LancamentoViewSet, basename="lancamento")
 router.register("meses", MesViewSet, basename="mes")
+router.register("recorrentes", RecorrenteViewSet, basename="recorrente")
+router.register("avulsos", AvulsoViewSet, basename="avulso")
 
 urlpatterns = [
     path("auth/csrf/", CsrfView.as_view(), name="auth-csrf"),

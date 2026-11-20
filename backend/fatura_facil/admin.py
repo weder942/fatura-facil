@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from fatura_facil.models import Compra, Fonte, Lancamento
+from fatura_facil.models import Avulso, Compra, Fonte, Lancamento, Recorrente, ValorDoMes, ValorRecorrente
 
 
 @admin.register(Fonte)
@@ -27,3 +27,27 @@ class CompraAdmin(admin.ModelAdmin):
 class LancamentoAdmin(admin.ModelAdmin):
     list_display = ["__str__", "fonte", "competencia", "tipo", "status", "origem"]
     list_filter = ["fonte", "tipo", "status", "origem", "competencia"]
+
+
+class ValorRecorrenteInline(admin.TabularInline):
+    model = ValorRecorrente
+    extra = 0
+
+
+class ValorDoMesInline(admin.TabularInline):
+    model = ValorDoMes
+    extra = 0
+
+
+@admin.register(Recorrente)
+class RecorrenteAdmin(admin.ModelAdmin):
+    list_display = ["nome", "grupo", "variavel", "ordem", "origem"]
+    list_filter = ["grupo", "variavel", "origem"]
+    inlines = [ValorRecorrenteInline, ValorDoMesInline]
+
+
+@admin.register(Avulso)
+class AvulsoAdmin(admin.ModelAdmin):
+    list_display = ["descricao", "grupo", "competencia", "valor", "origem"]
+    list_filter = ["grupo", "origem", "competencia"]
+    search_fields = ["descricao"]

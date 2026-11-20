@@ -21,6 +21,16 @@ class _BlocoDaFonteSerializer(serializers.Serializer):
     total = serializers.DecimalField(**_DINHEIRO)
 
 
+class _ItemDoMesSerializer(serializers.Serializer):
+    tipo = serializers.CharField()
+    id = serializers.IntegerField()
+    descricao = serializers.CharField()
+    valor = serializers.DecimalField(**_DINHEIRO)
+    variavel = serializers.BooleanField()
+    pendente = serializers.BooleanField()
+    ajustado = serializers.BooleanField()
+
+
 class _ResumoDoMesSerializer(serializers.Serializer):
     total_rendimentos = serializers.DecimalField(**_DINHEIRO)
     total_fixas = serializers.DecimalField(**_DINHEIRO)
@@ -31,8 +41,8 @@ class _ResumoDoMesSerializer(serializers.Serializer):
 
 class VisaoDoMesSerializer(serializers.Serializer):
     competencia = CompetenciaField()
-    rendimentos = serializers.ListField()
-    fixas = serializers.ListField()
+    rendimentos = _ItemDoMesSerializer(many=True)
+    fixas = _ItemDoMesSerializer(many=True)
     fontes = _BlocoDaFonteSerializer(many=True)
     resumo = _ResumoDoMesSerializer()
 
