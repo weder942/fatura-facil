@@ -62,34 +62,75 @@
     </div>
   </section>
 
-  @if (mes.fontes.length) {
-    <section class="mes__blocos">
-      @for (bloco of mes.fontes; track bloco.fonte.id) {
-        <mat-card appearance="outlined" class="mes__bloco">
-          <mat-card-header>
-            <mat-card-title>{{ bloco.fonte.nome }}</mat-card-title>
-            <mat-card-subtitle>{{ bloco.total | currency }}</mat-card-subtitle>
-          </mat-card-header>
-          <mat-card-content>
-            @for (lancamento of bloco.lancamentos; track lancamento.id) {
-              <button
-                type="button"
-                class="mes__lancamento"
-                [class.mes__lancamento--importado]="lancamento.origem === 'importacao'"
-                (click)="abrirLancamento(lancamento)"
-              >
-                <span class="mes__descricao">{{ lancamento.descricao }}</span>
-                <span class="mes__parcela">{{ lancamento.parcela }}</span>
-                <span class="mes__valor">{{ lancamento.valor | currency }}</span>
-              </button>
-            } @empty {
-              <p class="mes__vazio">Nenhum lançamento.</p>
-            }
-          </mat-card-content>
-        </mat-card>
-      }
-    </section>
-  } @else {
+  <section class="mes__blocos">
+    @for (grupo of grupos(); track grupo.valor) {
+      <mat-card appearance="outlined" class="mes__bloco">
+        <mat-card-header class="mes__bloco-cabecalho">
+          <mat-card-title>{{ grupo.titulo }}</mat-card-title>
+          <mat-card-subtitle>{{ grupo.total | currency }}</mat-card-subtitle>
+          <button
+            mat-icon-button
+            type="button"
+            class="mes__adicionar"
+            (click)="novoAvulso(grupo.valor)"
+            [attr.aria-label]="'Adicionar ' + grupo.titulo.toLowerCase() + ' só deste mês'"
+            [title]="'Adicionar só neste mês'"
+          >
+            <mat-icon>add</mat-icon>
+          </button>
+        </mat-card-header>
+        <mat-card-content>
+          @for (item of grupo.itens; track item.tipo + item.id) {
+            <button type="button" class="mes__lancamento" (click)="abrirItem(item, grupo.valor)">
+              <span class="mes__descricao">{{ item.descricao }}</span>
+              <span class="mes__parcela">
+                @if (item.pendente) {
+                  estimado
+                } @else if (item.ajustado) {
+                  ajustado
+                } @else if (item.tipo === 'avulso') {
+                  só este mês
+                }
+              </span>
+              <span class="mes__valor" [class.mes__valor--estimado]="item.pendente">{{
+                item.valor | currency
+              }}</span>
+            </button>
+          } @empty {
+            <p class="mes__vazio">
+              Nada neste mês. <a routerLink="/recorrentes">Cadastre os recorrentes</a>.
+            </p>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+    @for (bloco of mes.fontes; track bloco.fonte.id) {
+      <mat-card appearance="outlined" class="mes__bloco">
+        <mat-card-header>
+          <mat-card-title>{{ bloco.fonte.nome }}</mat-card-title>
+          <mat-card-subtitle>{{ bloco.total | currency }}</mat-card-subtitle>
+        </mat-card-header>
+        <mat-card-content>
+          @for (lancamento of bloco.lancamentos; track lancamento.id) {
+            <button
+              type="button"
+              class="mes__lancamento"
+              [class.mes__lancamento--importado]="lancamento.origem === 'importacao'"
+              (click)="abrirLancamento(lancamento)"
+            >
+              <span class="mes__descricao">{{ lancamento.descricao }}</span>
+              <span class="mes__parcela">{{ lancamento.parcela }}</span>
+              <span class="mes__valor">{{ lancamento.valor | currency }}</span>
+            </button>
+          } @empty {
+            <p class="mes__vazio">Nenhum lançamento.</p>
+          }
+        </mat-card-content>
+      </mat-card>
+    }
+  </section>
+
+  @if (!mes.fontes.length) {
     <p class="mes__vazio">
       Nenhuma fonte cadastrada. <a routerLink="/fontes">Cadastre os cartões e o dinheiro</a> para
       lançar compras.

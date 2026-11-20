@@ -1,5 +1,18 @@
 import { TipoFonte } from './fonte.model';
 
+/** Uma linha de rendimentos ou fixas. */
+export interface ItemDoMes {
+  tipo: 'recorrente' | 'avulso';
+  id: number;
+  descricao: string;
+  valor: string;
+  variavel: boolean;
+  /** Variável sem o valor real do mês: o valor mostrado é estimativa. */
+  pendente: boolean;
+  /** Fixo com valor sobrescrito só neste mês. */
+  ajustado: boolean;
+}
+
 export interface LancamentoDoMes {
   id: number;
   compra: number | null;
@@ -10,7 +23,7 @@ export interface LancamentoDoMes {
   valor: string;
   tipo: 'normal' | 'estorno' | 'recorrente';
   status: 'previsto' | 'confirmado';
-  origem: 'manual' | 'importacao';
+  origem: 'manual' | 'importacao' | 'planilha';
 }
 
 export interface BlocoDaFonte {
@@ -29,8 +42,8 @@ export interface ResumoDoMes {
 
 export interface VisaoDoMes {
   competencia: string;
-  rendimentos: LancamentoDoMes[];
-  fixas: LancamentoDoMes[];
+  rendimentos: ItemDoMes[];
+  fixas: ItemDoMes[];
   fontes: BlocoDaFonte[];
   resumo: ResumoDoMes;
 }

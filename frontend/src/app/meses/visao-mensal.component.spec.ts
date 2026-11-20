@@ -10,6 +10,8 @@ import { BehaviorSubject, of, throwError } from 'rxjs';
 import { VisaoDoMes } from '../core/models/mes.model';
 import { MesService } from '../core/services/mes.service';
 import { FormCompraComponent } from '../compras/form-compra/form-compra.component';
+import { FormAvulsoComponent } from './form-avulso/form-avulso.component';
+import { ValorDoMesComponent } from './valor-do-mes/valor-do-mes.component';
 import { VisaoMensalComponent } from './visao-mensal.component';
 
 registerLocaleData(localePt);
@@ -161,5 +163,91 @@ describe('VisaoMensalComponent', () => {
     expect(fixture.nativeElement.querySelector('[role=alert]').textContent).toContain(
       'Competência inválida.',
     );
+  });
+
+  describe('rendimentos e fixas', () => {
+    const energia = {
+      tipo: 'recorrente' as const,
+      id: 7,
+      descricao: 'Energia',
+      valor: '432.80',
+      variavel: true,
+      pendente: true,
+      ajustado: false,
+    };
+    const reembolso = {
+      tipo: 'avulso' as const,
+      id: 3,
+      descricao: 'Icloud (Natalia)',
+      valor: '66.90',
+      variavel: false,
+      pendente: false,
+      ajustado: false,
+    };
+    const aluguel = {
+      ...energia,
+      id: 8,
+      descricao: 'Aluguel',
+      variavel: false,
+      pendente: false,
+      ajustado: true,
+    };
+
+    beforeEach(() => {
+      meses.visao.mockReturnValue(
+        of({
+          ...NOVEMBRO,
+          rendimentos: [reembolso],
+          fixas: [aluguel, energia],
+          resumo: { ...NOVEMBRO.resumo, total_rendimentos: '66.90', total_fixas: '1710.79' },
+        }),
+      );
+      parametros.next(convertToParamMap({ competencia: '2026-11' }));
+      fixture.detectChanges();
+      dialog.open.mockReturnValue({ afterClosed: () => of(true) });
+    });
+
+    const linha = (descricao: string) =>
+      [...fixture.nativeElement.querySelectorAll('.mes__lancamento')].find((el: HTMLElement) =>
+        el.textContent!.includes(descricao),
+      ) as HTMLElement;
+
+    it('mostra os blocos com totais e marca estimado, ajustado e só este mês', () => {
+      expect(texto()).toContain('Rendimentos');
+      expect(texto()).toMatch(/R\$\s1\.710,79/);
+      expect(linha('Energia').textContent).toContain('estimado');
+      expect(linha('Energia').querySelector('.mes__valor--estimado')).not.toBeNull();
+      expect(linha('Aluguel').textContent).toContain('ajustado');
+      expect(linha('Icloud').textContent).toContain('só este mês');
+    });
+
+    it('recorrente abre o valor do mês e recarrega', () => {
+      linha('Energia').click();
+
+      expect(dialog.open).toHaveBeenCalledWith(ValorDoMesComponent, {
+        data: { item: energia, competencia: '2026-11' },
+      });
+      expect(meses.visao).toHaveBeenCalledTimes(3);
+    });
+
+    it('avulso abre a edição no grupo certo', () => {
+      linha('Icloud').click();
+
+      expect(dialog.open).toHaveBeenCalledWith(FormAvulsoComponent, {
+        data: { grupo: 'rendimento', competencia: '2026-11', avulso: reembolso },
+      });
+    });
+
+    it('o + do bloco cria um avulso do mês', () => {
+      fixture.nativeElement.querySelector('[aria-label="Adicionar fixas só deste mês"]').click();
+
+      expect(dialog.open).toHaveBeenCalledWith(FormAvulsoComponent, {
+        data: { grupo: 'fixa', competencia: '2026-11', avulso: null },
+      });
+    });
+  });
+
+  it('sem rendimentos, convida a cadastrar recorrentes', () => {
+    expect(texto()).toContain('Cadastre os recorrentes');
   });
 });

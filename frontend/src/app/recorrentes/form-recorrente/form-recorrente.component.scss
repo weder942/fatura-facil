@@ -1,0 +1,44 @@
+.form-recorrente {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: min(480px, 80vw);
+}
+
+.form-recorrente__linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px;
+
+  mat-form-field {
+    flex: 1 1 160px;
+  }
+}
+
+.form-recorrente__ordem {
+  flex: 0 1 100px !important;
+}
+
+.form-recorrente__botao {
+  margin-top: 10px;
+}
+
+.form-recorrente__valores h3 {
+  font: var(--mat-sys-title-small);
+  margin: 8px 0;
+}
+
+.form-recorrente__vigencia {
+  display: grid;
+  grid-template-columns: 8rem 1fr 40px;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  font-variant-numeric: tabular-nums;
+}
+
+.form-recorrente__erro {
+  color: var(--mat-sys-error);
+}

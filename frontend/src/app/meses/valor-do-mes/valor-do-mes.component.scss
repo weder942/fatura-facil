@@ -1,0 +1,22 @@
+.valor-do-mes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: min(400px, 80vw);
+}
+
+.valor-do-mes__explicacao {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.valor-do-mes__erro {
+  color: var(--mat-sys-error);
+}
+
+.valor-do-mes__acoes {
+  display: flex;
+}
+
+.valor-do-mes__espaco {
+  flex: 1;
+}

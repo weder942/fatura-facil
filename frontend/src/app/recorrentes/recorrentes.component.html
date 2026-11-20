@@ -1,0 +1,77 @@
+<header class="recorrentes__cabecalho">
+  <h1>Recorrentes</h1>
+</header>
+
+@for (grupo of grupos(); track grupo.valor) {
+  <section class="recorrentes__grupo" [attr.aria-label]="grupo.rotulo">
+    <header class="recorrentes__cabecalho">
+      <h2>{{ grupo.valor === 'rendimento' ? 'Rendimentos' : 'Fixas' }}</h2>
+      <button mat-stroked-button type="button" (click)="abrir(null, grupo.valor)">
+        <mat-icon>add</mat-icon>
+        {{ grupo.valor === 'rendimento' ? 'Novo rendimento' : 'Nova fixa' }}
+      </button>
+    </header>
+
+    @if (grupo.itens.length) {
+      <table mat-table [dataSource]="grupo.itens" class="recorrentes__tabela">
+        <ng-container matColumnDef="nome">
+          <th mat-header-cell *matHeaderCellDef>Nome</th>
+          <td mat-cell *matCellDef="let recorrente">
+            {{ recorrente.nome }}
+            @if (recorrente.variavel) {
+              <span class="recorrentes__marca">variável</span>
+            }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="valor">
+          <th mat-header-cell *matHeaderCellDef class="recorrentes__numero">Valor hoje</th>
+          <td mat-cell *matCellDef="let recorrente" class="recorrentes__numero">
+            @if (recorrente.valor_atual !== null) {
+              {{ recorrente.valor_atual | currency }}
+            } @else {
+              <span class="recorrentes__marca">fora de vigência</span>
+            }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="desde">
+          <th mat-header-cell *matHeaderCellDef>Desde</th>
+          <td mat-cell *matCellDef="let recorrente">
+            @if (desde(recorrente); as inicio) {
+              {{ inicio | competencia }}
+            }
+          </td>
+        </ng-container>
+        <ng-container matColumnDef="acoes">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let recorrente" class="recorrentes__acoes">
+            <button
+              mat-icon-button
+              type="button"
+              (click)="abrir(recorrente)"
+              [attr.aria-label]="'Editar ' + recorrente.nome"
+            >
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              type="button"
+              (click)="excluir(recorrente)"
+              [attr.aria-label]="'Excluir ' + recorrente.nome"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="colunas"></tr>
+        <tr
+          mat-row
+          *matRowDef="let recorrente; columns: colunas"
+          [class.recorrentes__encerrado]="recorrente.valor_atual === null"
+        ></tr>
+      </table>
+    } @else {
+      <p class="recorrentes__vazio">Nenhum cadastrado.</p>
+    }
+  </section>
+}

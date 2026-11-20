@@ -27,6 +27,12 @@ export const routes: Routes = [
         loadComponent: () => import('./fontes/fontes.component').then((m) => m.FontesComponent),
         title: 'Fontes · Fatura Fácil',
       },
+      {
+        path: 'recorrentes',
+        loadComponent: () =>
+          import('./recorrentes/recorrentes.component').then((m) => m.RecorrentesComponent),
+        title: 'Recorrentes · Fatura Fácil',
+      },
     ],
   },
   { path: '**', redirectTo: '' },

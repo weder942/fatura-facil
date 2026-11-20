@@ -86,6 +86,11 @@ Categorias e painel de gastos, rateio e reembolso de terceiros, regras de apelid
 - Reajuste: cadastrar um novo valor com `a_partir_de = X`. Todos os meses abertos ≥ X passam a mostrar o novo valor, sem editar mês a mês.
 - Recorrente **variável** (água, energia): usa o último valor informado como estimativa e mostra "valor real pendente" até o usuário informar o valor do mês.
 - Na visão mensal, é possível sobrescrever o valor de um recorrente só naquele mês.
+- **Decisões da implementação (2026-11-20):**
+  - Não há campo de sinal: descontos dentro dos rendimentos (INSS, IRRF, Unimed) são recorrentes de rendimento com valor negativo, como na planilha.
+  - Não há flag `ativo`: um recorrente que acaba é **encerrado** (último mês = `ate` da vigência) e some dos meses seguintes; um reajuste depois disso volta a valer.
+  - **Avulsos:** rendimento ou fixa de um mês só (férias, "Outros", reembolsos de terceiros como "Icloud (Natalia)"). Reembolsos ficam como rendimento avulso, igual à planilha, sem ligação com a compra no cartão.
+  - Na visão mensal, clicar num recorrente abre o valor daquele mês (o real de um variável ou um ajuste de um fixo), com opção de voltar ao previsto; o "+" de cada bloco cria um avulso.
 
 ### 2.2 Importação do histórico
 - Depende dos recorrentes (2.1): a planilha traz rendimentos e fixas, que viram recorrentes.

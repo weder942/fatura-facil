@@ -1,0 +1,55 @@
+<h2 mat-dialog-title>
+  {{ dados.avulso ? 'Editar' : 'Novo' }}
+  {{ dados.grupo === 'rendimento' ? 'rendimento' : 'gasto fixo' }} de
+  {{ dados.competencia | competencia }}
+</h2>
+
+<form [formGroup]="form" (ngSubmit)="salvar()">
+  <mat-dialog-content class="form-avulso">
+    <p class="form-avulso__explicacao">
+      Só neste mês. Para algo que se repete, cadastre um recorrente.
+    </p>
+
+    <mat-form-field>
+      <mat-label>Descrição</mat-label>
+      <input
+        matInput
+        formControlName="descricao"
+        [placeholder]="dados.grupo === 'rendimento' ? 'Ex.: Icloud (Natalia)' : 'Ex.: Docs moto'"
+      />
+      @if (form.controls.descricao.hasError('required')) {
+        <mat-error>Informe a descrição.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Valor (R$)</mat-label>
+      <input matInput formControlName="valor" inputmode="decimal" placeholder="0,00" />
+      @if (form.controls.valor.invalid) {
+        <mat-error>Valor inválido (ex.: 1.234,56).</mat-error>
+      }
+    </mat-form-field>
+
+    @if (erro(); as mensagem) {
+      <p class="form-avulso__erro" role="alert">{{ mensagem }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="form-avulso__acoes">
+    @if (dados.avulso) {
+      <button
+        mat-button
+        type="button"
+        class="form-avulso__excluir"
+        (click)="excluir()"
+        [disabled]="salvando()"
+      >
+        <mat-icon>delete</mat-icon>
+        Excluir
+      </button>
+    }
+    <span class="form-avulso__espaco"></span>
+    <button mat-button type="button" mat-dialog-close>Cancelar</button>
+    <button mat-flat-button type="submit" [disabled]="salvando()">Salvar</button>
+  </mat-dialog-actions>
+</form>

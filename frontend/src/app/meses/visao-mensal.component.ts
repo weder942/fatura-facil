@@ -3,19 +3,27 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { BehaviorSubject, catchError, combineLatest, filter, map, of, switchMap, tap } from 'rxjs';
 
-import { CompetenciaDoHorizonte, LancamentoDoMes, VisaoDoMes } from '../core/models/mes.model';
+import {
+  CompetenciaDoHorizonte,
+  ItemDoMes,
+  LancamentoDoMes,
+  VisaoDoMes,
+} from '../core/models/mes.model';
+import { Grupo } from '../core/models/recorrente.model';
 import { MesService } from '../core/services/mes.service';
 import {
   DadosDoFormCompra,
   FormCompraComponent,
 } from '../compras/form-compra/form-compra.component';
 import { CompetenciaPipe } from '../shared/pipes/competencia.pipe';
+import { DadosDoFormAvulso, FormAvulsoComponent } from './form-avulso/form-avulso.component';
+import { DadosDoValorDoMes, ValorDoMesComponent } from './valor-do-mes/valor-do-mes.component';
 import { somarMeses } from '../shared/utils/competencia';
 import { mensagemDeErro } from '../shared/utils/erro-da-api';
 
@@ -58,6 +66,23 @@ export class VisaoMensalComponent {
     return lista.includes(atual) || !atual ? lista : [...lista, atual].sort();
   });
 
+  /** Os blocos de rendimentos e fixas, antes dos blocos das fontes. */
+  protected readonly grupos = computed(() => {
+    const mes = this.visao();
+    if (!mes) {
+      return [];
+    }
+    return [
+      {
+        valor: 'rendimento' as Grupo,
+        titulo: 'Rendimentos',
+        itens: mes.rendimentos,
+        total: mes.resumo.total_rendimentos,
+      },
+      { valor: 'fixa' as Grupo, titulo: 'Fixas', itens: mes.fixas, total: mes.resumo.total_fixas },
+    ];
+  });
+
   constructor() {
     this.recarregar$
       .pipe(
@@ -97,16 +122,44 @@ export class VisaoMensalComponent {
     }
   }
 
+  protected novoAvulso(grupo: Grupo): void {
+    this.aoFechar(
+      this.dialog.open<FormAvulsoComponent, DadosDoFormAvulso, boolean>(FormAvulsoComponent, {
+        data: { grupo, competencia: this.competencia(), avulso: null },
+      }),
+    );
+  }
+
+  /** Recorrente: valor deste mês. Avulso: editar ou excluir. */
+  protected abrirItem(item: ItemDoMes, grupo: Grupo): void {
+    const competencia = this.competencia();
+    this.aoFechar(
+      item.tipo === 'recorrente'
+        ? this.dialog.open<ValorDoMesComponent, DadosDoValorDoMes, boolean>(ValorDoMesComponent, {
+            data: { item, competencia },
+          })
+        : this.dialog.open<FormAvulsoComponent, DadosDoFormAvulso, boolean>(FormAvulsoComponent, {
+            data: { grupo, competencia, avulso: item },
+          }),
+    );
+  }
+
   protected negativo(valor: string): boolean {
     return valor.startsWith('-');
   }
 
   private abrirCompra(compraId: number | null): void {
-    this.dialog
-      .open<FormCompraComponent, DadosDoFormCompra, boolean>(FormCompraComponent, {
+    this.aoFechar(
+      this.dialog.open<FormCompraComponent, DadosDoFormCompra, boolean>(FormCompraComponent, {
         data: { compraId },
         autoFocus: 'first-tabbable',
-      })
+      }),
+    );
+  }
+
+  /** Recarrega o mês se o diálogo fechar dizendo que algo mudou. */
+  private aoFechar(dialogo: MatDialogRef<unknown, boolean>): void {
+    dialogo
       .afterClosed()
       .pipe(filter(Boolean))
       .subscribe(() => this.recarregar$.next());

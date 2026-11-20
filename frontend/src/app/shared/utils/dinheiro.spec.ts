@@ -1,4 +1,11 @@
-import { deCentavos, dividirEmParcelas, emCentavos, paraCampo, paraValorDaApi } from './dinheiro';
+import {
+  deCentavos,
+  dividirEmParcelas,
+  emCentavos,
+  paraCampo,
+  paraValorComSinal,
+  paraValorDaApi,
+} from './dinheiro';
 
 describe('dinheiro', () => {
   it.each([
@@ -38,5 +45,18 @@ describe('parcelas em centavos', () => {
   it('recusa divisão impossível', () => {
     expect(dividirEmParcelas('0.02', 3)).toBeNull();
     expect(dividirEmParcelas('10.00', 0)).toBeNull();
+  });
+});
+
+describe('paraValorComSinal', () => {
+  it.each([
+    ['-951,52', '-951.52'],
+    [' -1.234,5 ', '-1234.50'],
+    ['66,90', '66.90'],
+    ['-0', '0.00'],
+    ['--1', null],
+    ['-', null],
+  ])('%s → %s', (digitado, esperado) => {
+    expect(paraValorComSinal(digitado)).toBe(esperado);
   });
 });

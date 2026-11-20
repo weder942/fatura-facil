@@ -1,0 +1,124 @@
+<h2 mat-dialog-title>{{ recorrente() ? 'Editar recorrente' : 'Novo recorrente' }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="salvar()">
+  <mat-dialog-content class="form-recorrente">
+    <mat-form-field>
+      <mat-label>Nome</mat-label>
+      <input matInput formControlName="nome" placeholder="Ex.: Aluguel" />
+      @if (form.controls.nome.hasError('required')) {
+        <mat-error>Informe o nome.</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="form-recorrente__linha">
+      <mat-form-field>
+        <mat-label>Grupo</mat-label>
+        <mat-select formControlName="grupo">
+          @for (grupo of grupos; track grupo.valor) {
+            <mat-option [value]="grupo.valor">{{ grupo.rotulo }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field class="form-recorrente__ordem">
+        <mat-label>Ordem</mat-label>
+        <input matInput type="number" min="0" formControlName="ordem" />
+      </mat-form-field>
+    </div>
+
+    <mat-checkbox formControlName="variavel"> Valor muda todo mês (água, energia) </mat-checkbox>
+
+    @if (!recorrente()) {
+      <div class="form-recorrente__linha">
+        <mat-form-field>
+          <mat-label>Valor (R$)</mat-label>
+          <input matInput formControlName="valor" inputmode="decimal" placeholder="0,00" />
+          <mat-hint>Descontos (INSS, IRRF) com sinal de menos.</mat-hint>
+          @if (form.controls.valor.invalid) {
+            <mat-error>Valor inválido (ex.: 1.234,56 ou -951,52).</mat-error>
+          }
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>A partir de</mat-label>
+          <input matInput type="month" formControlName="a_partir_de" />
+        </mat-form-field>
+      </div>
+    }
+
+    @if (recorrente(); as atual) {
+      <section class="form-recorrente__valores" aria-label="Valores">
+        <h3>Valores</h3>
+        @for (vigencia of atual.valores; track vigencia.id) {
+          <div class="form-recorrente__vigencia">
+            <span>{{ vigencia.valor | currency }}</span>
+            <span>
+              desde {{ vigencia.a_partir_de | competencia }}
+              @if (vigencia.ate) {
+                até {{ vigencia.ate | competencia }}
+              }
+            </span>
+            @if (atual.valores.length > 1) {
+              <button
+                mat-icon-button
+                type="button"
+                (click)="removerVigencia(vigencia)"
+                [disabled]="salvando()"
+                [attr.aria-label]="'Remover valor desde ' + (vigencia.a_partir_de | competencia)"
+              >
+                <mat-icon>close</mat-icon>
+              </button>
+            }
+          </div>
+        }
+
+        <div class="form-recorrente__linha" [formGroup]="reajuste">
+          <mat-form-field>
+            <mat-label>Novo valor (R$)</mat-label>
+            <input matInput formControlName="valor" inputmode="decimal" placeholder="0,00" />
+            @if (reajuste.controls.valor.invalid && reajuste.controls.valor.touched) {
+              <mat-error>Valor inválido.</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field>
+            <mat-label>A partir de</mat-label>
+            <input matInput type="month" formControlName="a_partir_de" />
+          </mat-form-field>
+          <button
+            mat-stroked-button
+            type="button"
+            class="form-recorrente__botao"
+            (click)="reajustar()"
+            [disabled]="salvando()"
+          >
+            Reajustar
+          </button>
+        </div>
+
+        <div class="form-recorrente__linha">
+          <mat-form-field>
+            <mat-label>Último mês</mat-label>
+            <input matInput type="month" [formControl]="fim" />
+            <mat-hint>Depois dele, o recorrente some dos meses.</mat-hint>
+          </mat-form-field>
+          <button
+            mat-stroked-button
+            type="button"
+            class="form-recorrente__botao"
+            (click)="encerrar()"
+            [disabled]="salvando()"
+          >
+            Encerrar
+          </button>
+        </div>
+      </section>
+    }
+
+    @if (erro(); as mensagem) {
+      <p class="form-recorrente__erro" role="alert">{{ mensagem }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" [mat-dialog-close]="alterado()">Cancelar</button>
+    <button mat-flat-button type="submit" [disabled]="salvando()">Salvar</button>
+  </mat-dialog-actions>
+</form>

@@ -1,0 +1,47 @@
+.recorrentes__cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 900px;
+
+  h1 {
+    font: var(--mat-sys-headline-small);
+  }
+
+  h2 {
+    font: var(--mat-sys-title-large);
+  }
+}
+
+.recorrentes__grupo {
+  margin-bottom: 24px;
+}
+
+.recorrentes__tabela {
+  max-width: 900px;
+}
+
+.recorrentes__numero {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.recorrentes__acoes {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.recorrentes__marca {
+  margin-left: 6px;
+  font: var(--mat-sys-label-small);
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.recorrentes__encerrado {
+  opacity: 0.6;
+}
+
+.recorrentes__vazio {
+  color: var(--mat-sys-on-surface-variant);
+}

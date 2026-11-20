@@ -1,0 +1,26 @@
+.form-avulso {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: min(400px, 80vw);
+}
+
+.form-avulso__explicacao {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.form-avulso__erro {
+  color: var(--mat-sys-error);
+}
+
+.form-avulso__acoes {
+  display: flex;
+}
+
+.form-avulso__espaco {
+  flex: 1;
+}
+
+.form-avulso__excluir {
+  color: var(--mat-sys-error);
+}

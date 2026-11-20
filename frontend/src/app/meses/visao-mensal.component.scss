@@ -96,6 +96,21 @@
   font-variant-numeric: tabular-nums;
 }
 
+.mes__bloco-cabecalho {
+  position: relative;
+}
+
+.mes__adicionar {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+}
+
+.mes__valor--estimado {
+  font-style: italic;
+  color: var(--mat-sys-on-surface-variant);
+}
+
 .mes__vazio {
   color: var(--mat-sys-on-surface-variant);
 }

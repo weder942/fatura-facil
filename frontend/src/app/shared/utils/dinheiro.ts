@@ -25,6 +25,17 @@ export function paraValorDaApi(digitado: string): string | null {
   return `${String(Number(inteiro))}.${centavos.padEnd(2, '0')}`;
 }
 
+/**
+ * Como `paraValorDaApi`, aceitando sinal: rendimentos têm descontos negativos
+ * (INSS, IRRF). "-951,52" → "-951.52".
+ */
+export function paraValorComSinal(digitado: string): string | null {
+  const texto = digitado.trim();
+  const negativo = texto.startsWith('-');
+  const valor = paraValorDaApi(negativo ? texto.slice(1) : texto);
+  return valor === null ? null : negativo && valor !== '0.00' ? `-${valor}` : valor;
+}
+
 /** "1234.50" (API) → "1234,50" (para preencher um campo de edição). */
 export function paraCampo(valorDaApi: string): string {
   return valorDaApi.replace('.', ',');
