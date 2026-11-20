@@ -131,3 +131,20 @@ def test_lista_sem_uma_consulta_por_compra(api_client_logado, django_assert_max_
         resposta = api_client_logado.get(LISTA)
 
     assert len(resposta.json()) == 5
+
+
+def test_cria_com_valor_da_primeira_parcela(api_client_logado):
+    dados = {
+        "fonte": FonteFactory().pk,
+        "data": "2026-11-24",
+        "descricao": "Óculos",
+        "valor_total": "416.00",
+        "n_parcelas": 3,
+        "valor_primeira_parcela": "138.66",
+    }
+
+    resposta = api_client_logado.post(LISTA, dados, format="json")
+
+    assert resposta.status_code == 201
+    assert [p["valor"] for p in resposta.json()["parcelas"]] == ["138.66", "138.67", "138.67"]
+    assert "valor_primeira_parcela" not in resposta.json()

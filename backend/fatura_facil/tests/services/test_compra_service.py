@@ -183,3 +183,24 @@ class TestAjustarParcela:
 
         with pytest.raises(RegraDeNegocioError):
             CompraService().ajustar_parcela(lancamento, D("1.00"))
+
+
+class TestValorDaPrimeiraParcela:
+    def test_criar_com_a_primeira_informada(self):
+        compra = criar_compra(valor_total=D("416.00"), n_parcelas=3, valor_primeira_parcela=D("138.66"))
+
+        assert [p[2] for p in _parcelas(compra)] == [D("138.66"), D("138.67"), D("138.67")]
+
+    def test_editar_a_primeira_regera_as_demais(self):
+        compra = criar_compra(valor_total=D("300.00"), n_parcelas=3)
+
+        CompraService().atualizar(compra, valor_primeira_parcela=D("120.00"))
+
+        assert [p[2] for p in _parcelas(compra)] == [D("120.00"), D("90.00"), D("90.00")]
+
+    def test_editar_o_total_sem_a_primeira_volta_a_dividir_igual(self):
+        compra = criar_compra(valor_total=D("300.00"), n_parcelas=3, valor_primeira_parcela=D("120.00"))
+
+        CompraService().atualizar(compra, valor_total=D("330.00"))
+
+        assert [p[2] for p in _parcelas(compra)] == [D("110.00"), D("110.00"), D("110.00")]

@@ -23,6 +23,14 @@ class CompraSerializer(serializers.ModelSerializer):
     valor_total = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=Decimal("0.01"))
     n_parcelas = serializers.IntegerField(min_value=1, max_value=120, default=1)
     competencia_inicial = CompetenciaField(required=False)
+    valor_primeira_parcela = serializers.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        min_value=Decimal("0.01"),
+        required=False,
+        write_only=True,
+        help_text="Opcional: valor da 1ª parcela; o restante é dividido entre as demais.",
+    )
     parcelas = serializers.SerializerMethodField()
 
     class Meta:
@@ -36,6 +44,7 @@ class CompraSerializer(serializers.ModelSerializer):
             "valor_total",
             "n_parcelas",
             "competencia_inicial",
+            "valor_primeira_parcela",
             "origem",
             "parcelas",
         ]

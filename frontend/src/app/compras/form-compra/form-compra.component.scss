@@ -15,6 +15,14 @@
   }
 }
 
+.form-compra__quantidade {
+  flex: 0 1 120px !important;
+}
+
+.form-compra__parcelada {
+  margin: 4px 0 12px;
+}
+
 .form-compra__parcelas h3 {
   font: var(--mat-sys-title-small);
   margin: 8px 0;

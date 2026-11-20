@@ -40,8 +40,16 @@ def dividir_valor(total: Decimal, n: int) -> list[Decimal]:
     return [Decimal(v) * CENTAVO for v in valores]
 
 
-def gerar_parcelas(total: Decimal, n: int, competencia_inicial: date) -> list[Parcela]:
-    """Parcelas 1..n em competências consecutivas a partir de `competencia_inicial`."""
+def gerar_parcelas(
+    total: Decimal, n: int, competencia_inicial: date, *, valor_primeira: Decimal | None = None
+) -> list[Parcela]:
+    """Parcelas 1..n em competências consecutivas a partir de `competencia_inicial`.
+
+    Com `valor_primeira`, a 1ª parcela tem esse valor e o restante é dividido
+    entre as demais (sobra dos centavos na 2ª).
+    """
+    if valor_primeira is not None:
+        return redistribuir_parcelas(total, n, competencia_inicial, confirmadas={}, valor_primeira=valor_primeira)
     return [
         Parcela(numero=numero, competencia=somar_meses(competencia_inicial, numero - 1), valor=valor)
         for numero, valor in enumerate(dividir_valor(total, n), start=1)
@@ -49,13 +57,19 @@ def gerar_parcelas(total: Decimal, n: int, competencia_inicial: date) -> list[Pa
 
 
 def redistribuir_parcelas(
-    total: Decimal, n: int, competencia_inicial: date, *, confirmadas: Mapping[int, Decimal]
+    total: Decimal,
+    n: int,
+    competencia_inicial: date,
+    *,
+    confirmadas: Mapping[int, Decimal],
+    valor_primeira: Decimal | None = None,
 ) -> list[Parcela]:
     """Regera as parcelas NÃO confirmadas de uma compra editada.
 
     As confirmadas (por importação de fatura) não mudam e não são devolvidas.
-    O restante (`total − soma das confirmadas`) é dividido entre as demais,
-    com a sobra dos centavos na primeira delas.
+    Com `valor_primeira`, a 1ª parcela (se não confirmada) fica com esse valor.
+    O restante é dividido entre as demais, com a sobra dos centavos na
+    primeira delas.
     """
     _validar_total(total)
     fora_do_intervalo = sorted(numero for numero in confirmadas if not 1 <= numero <= n)
@@ -64,25 +78,43 @@ def redistribuir_parcelas(
             f"A compra não pode ter {n} parcela(s): a(s) parcela(s) {fora_do_intervalo} já foi(ram) confirmada(s)."
         )
 
-    restante = total - sum(confirmadas.values(), Decimal(0))
-    pendentes = [numero for numero in range(1, n + 1) if numero not in confirmadas]
+    definidas = dict(confirmadas)
+    if valor_primeira is not None:
+        _validar_valor_primeira(valor_primeira, total, n, confirmadas)
+        definidas[1] = valor_primeira
+
+    restante = total - sum(definidas.values(), Decimal(0))
+    pendentes = [numero for numero in range(1, n + 1) if numero not in definidas]
 
     if not pendentes:
         if restante != 0:
             raise RegraDeNegocioError(
                 f"Todas as parcelas estão confirmadas e somam R$ {total - restante}; o total não pode ser R$ {total}."
             )
-        return []
-    if restante <= 0:
+        valores = {}
+    elif restante <= 0:
         raise RegraDeNegocioError(
-            f"O total (R$ {total}) precisa ser maior que a soma das parcelas confirmadas (R$ {total - restante})."
+            f"O total (R$ {total}) precisa ser maior que a soma das parcelas já definidas (R$ {total - restante})."
         )
+    else:
+        valores = dict(zip(pendentes, dividir_valor(restante, len(pendentes)), strict=True))
 
-    valores = dividir_valor(restante, len(pendentes))
+    if 1 in definidas and 1 not in confirmadas:
+        valores[1] = definidas[1]
     return [
-        Parcela(numero=numero, competencia=somar_meses(competencia_inicial, numero - 1), valor=valor)
-        for numero, valor in zip(pendentes, valores, strict=True)
+        Parcela(numero=numero, competencia=somar_meses(competencia_inicial, numero - 1), valor=valores[numero])
+        for numero in sorted(valores)
     ]
+
+
+def _validar_valor_primeira(valor: Decimal, total: Decimal, n: int, confirmadas: Mapping[int, Decimal]) -> None:
+    _validar_total(valor)
+    if 1 in confirmadas and confirmadas[1] != valor:
+        raise RegraDeNegocioError("A 1ª parcela já foi confirmada pela fatura e não pode mudar.")
+    if n == 1 and valor != total:
+        raise RegraDeNegocioError("Numa compra à vista, a 1ª parcela é o próprio total.")
+    if n > 1 and valor >= total:
+        raise RegraDeNegocioError("A 1ª parcela precisa ser menor que o valor total.")
 
 
 def _validar_total(total: Decimal) -> None:

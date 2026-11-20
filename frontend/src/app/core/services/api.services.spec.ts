@@ -63,6 +63,7 @@ describe('services da API', () => {
       descricao: 'Óculos',
       valor_total: '416.00',
       n_parcelas: 3,
+      competencia_inicial: '2026-12',
     };
 
     service.obter(7).subscribe();

@@ -1,39 +1,54 @@
-// Include theming for Angular Material with `mat.theme()`.
-// This Sass mixin will define CSS variables that are used for styling Angular Material
-// components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
+// Tema escuro preto + laranja, a mesma paleta do what-is-the-price
+// (src/utils/color-utils.js de lá): primária #FF9052, fundo #000,
+// superfície secundária #1F201B, erro #E3003E.
 @use '@angular/material' as mat;
 
 html {
   height: 100%;
+  color-scheme: dark;
+
   @include mat.theme(
     (
       color: (
-        primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
+        theme-type: dark,
+        primary: mat.$orange-palette,
+        tertiary: mat.$yellow-palette,
       ),
       typography: Roboto,
       density: 0,
     )
   );
+
+  // Ajusta os tons gerados pela paleta para as cores exatas do what-is-the-price.
+  @include mat.theme-overrides(
+    (
+      primary: #ff9052,
+      on-primary: #000000,
+      primary-container: #5c2a0d,
+      on-primary-container: #ffdbc8,
+      background: #000000,
+      surface: #000000,
+      surface-container-lowest: #000000,
+      surface-container-low: #121310,
+      surface-container: #1f201b,
+      surface-container-high: #2a2a2a,
+      surface-container-highest: #303030,
+      outline: #595959,
+      outline-variant: #303030,
+      error: #e3003e,
+      on-error: #ffffff,
+    )
+  );
 }
 
 body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
-  color-scheme: light;
-
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
   background-color: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface);
   font: var(--mat-sys-body-medium);
-
-  // Reset the user agent margin.
   margin: 0;
   height: 100%;
 }
-/* You can add global styles to this file, and also import other style files */
+
+a {
+  color: var(--mat-sys-primary);
+}

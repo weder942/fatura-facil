@@ -15,7 +15,15 @@ from fatura_facil.services.parcelamento_service import (
 
 __all__ = ["CompraService"]
 
-_CAMPOS_EDITAVEIS = {"fonte", "data", "descricao", "valor_total", "n_parcelas", "competencia_inicial"}
+_CAMPOS_EDITAVEIS = {
+    "fonte",
+    "data",
+    "descricao",
+    "valor_total",
+    "n_parcelas",
+    "competencia_inicial",
+    "valor_primeira_parcela",
+}
 
 
 class CompraService:
@@ -42,13 +50,14 @@ class CompraService:
         valor_total: Decimal,
         n_parcelas: int = 1,
         competencia_inicial: date | None = None,
+        valor_primeira_parcela: Decimal | None = None,
         descricao_original: str = "",
         origem: str = Origem.MANUAL,
     ) -> Compra:
         if not fonte.ativa:
             raise RegraDeNegocioError(f"A fonte {fonte.nome} está inativa.")
         competencia_inicial = competencia_inicial or self.competencia_sugerida(fonte, data)
-        parcelas = gerar_parcelas(valor_total, n_parcelas, competencia_inicial)
+        parcelas = gerar_parcelas(valor_total, n_parcelas, competencia_inicial, valor_primeira=valor_primeira_parcela)
 
         compra = Compra.objects.create(
             fonte=fonte,
@@ -71,6 +80,8 @@ class CompraService:
           a competência sugerida.
         - Parcelas confirmadas por importação não mudam; a fonte não pode
           mudar se houver alguma.
+        - Com `valor_primeira_parcela`, a 1ª fica com esse valor e as demais
+          dividem o resto; sem ele, o total volta a ser dividido igualmente.
         - Só mudar a descrição não mexe nas parcelas (preserva ajustes de
           centavos feitos parcela a parcela).
         """
@@ -88,6 +99,7 @@ class CompraService:
         if fonte_mudou and not nova_fonte.ativa:
             raise RegraDeNegocioError(f"A fonte {nova_fonte.nome} está inativa.")
 
+        valor_primeira = alteracoes.pop("valor_primeira_parcela", None)
         data_mudou = "data" in alteracoes and alteracoes["data"] != compra.data
         antes = (compra.valor_total, compra.n_parcelas, compra.competencia_inicial)
 
@@ -97,9 +109,13 @@ class CompraService:
             compra.competencia_inicial = self.competencia_sugerida(compra.fonte, compra.data)
 
         depois = (compra.valor_total, compra.n_parcelas, compra.competencia_inicial)
-        if fonte_mudou or antes != depois:
+        if fonte_mudou or antes != depois or valor_primeira is not None:
             parcelas = redistribuir_parcelas(
-                compra.valor_total, compra.n_parcelas, compra.competencia_inicial, confirmadas=confirmadas
+                compra.valor_total,
+                compra.n_parcelas,
+                compra.competencia_inicial,
+                confirmadas=confirmadas,
+                valor_primeira=valor_primeira,
             )
             self._normais(compra).filter(status=Lancamento.Status.PREVISTO).delete()
             self._criar_lancamentos(compra, parcelas)

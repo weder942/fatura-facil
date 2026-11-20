@@ -1,4 +1,4 @@
-import { paraCampo, paraValorDaApi } from './dinheiro';
+import { deCentavos, dividirEmParcelas, emCentavos, paraCampo, paraValorDaApi } from './dinheiro';
 
 describe('dinheiro', () => {
   it.each([
@@ -20,5 +20,23 @@ describe('dinheiro', () => {
 
   it('paraCampo troca o ponto pela vírgula', () => {
     expect(paraCampo('1234.50')).toBe('1234,50');
+  });
+});
+
+describe('parcelas em centavos', () => {
+  it('converte de e para centavos', () => {
+    expect(emCentavos('1234.5')).toBe(123450);
+    expect(emCentavos('7')).toBe(700);
+    expect(deCentavos(123405)).toBe('1234.05');
+  });
+
+  it('divide com a sobra na primeira', () => {
+    expect(dividirEmParcelas('416.00', 3)).toEqual(['138.68', '138.66', '138.66']);
+    expect(dividirEmParcelas('474.05', 5)).toEqual(Array(5).fill('94.81'));
+  });
+
+  it('recusa divisão impossível', () => {
+    expect(dividirEmParcelas('0.02', 3)).toBeNull();
+    expect(dividirEmParcelas('10.00', 0)).toBeNull();
   });
 });

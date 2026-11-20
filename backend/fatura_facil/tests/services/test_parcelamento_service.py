@@ -147,3 +147,59 @@ class TestRedistribuirParcelas:
     def test_recusa_restante_menor_que_um_centavo_por_parcela(self):
         with pytest.raises(RegraDeNegocioError):
             redistribuir_parcelas(D("100.01"), 3, date(2026, 11, 1), confirmadas={1: D("100.00")})
+
+
+class TestValorDaPrimeiraParcela:
+    """O usuário pode informar a 1ª parcela (quando o banco divide diferente);
+    o restante é dividido entre as demais, com a sobra na 2ª."""
+
+    def test_primeira_informada_e_o_resto_dividido(self):
+        parcelas = gerar_parcelas(D("416.00"), 3, date(2026, 11, 1), valor_primeira=D("138.66"))
+
+        assert [(p.numero, p.valor) for p in parcelas] == [(1, D("138.66")), (2, D("138.67")), (3, D("138.67"))]
+        assert [p.competencia for p in parcelas] == [date(2026, 11, 1), date(2026, 12, 1), date(2027, 1, 1)]
+
+    def test_sobra_do_resto_vai_para_a_segunda(self):
+        parcelas = gerar_parcelas(D("100.01"), 3, date(2026, 11, 1), valor_primeira=D("10.00"))
+
+        assert [p.valor for p in parcelas] == [D("10.00"), D("45.01"), D("45.00")]
+
+    def test_a_vista_aceita_primeira_igual_ao_total(self):
+        assert gerar_parcelas(D("50.00"), 1, date(2026, 11, 1), valor_primeira=D("50.00")) == [
+            Parcela(numero=1, competencia=date(2026, 11, 1), valor=D("50.00"))
+        ]
+
+    @pytest.mark.parametrize(
+        ("total", "n", "primeira"),
+        [
+            (D("50.00"), 1, D("40.00")),  # à vista: 1ª diferente do total
+            (D("100.00"), 3, D("100.00")),  # 1ª igual ao total, nada para as demais
+            (D("100.00"), 3, D("150.00")),  # 1ª maior que o total
+            (D("100.00"), 3, D("99.99")),  # sobra 1 centavo para 2 parcelas
+            (D("100.00"), 3, D("0")),
+            (D("100.00"), 3, D("10.001")),
+        ],
+    )
+    def test_recusa_primeira_invalida(self, total, n, primeira):
+        with pytest.raises(RegraDeNegocioError):
+            gerar_parcelas(total, n, date(2026, 11, 1), valor_primeira=primeira)
+
+    def test_redistribuir_com_primeira_e_confirmada(self):
+        parcelas = redistribuir_parcelas(
+            D("300.00"), 3, date(2026, 11, 1), confirmadas={2: D("100.00")}, valor_primeira=D("50.00")
+        )
+
+        assert [(p.numero, p.valor) for p in parcelas] == [(1, D("50.00")), (3, D("150.00"))]
+
+    def test_primeira_ja_confirmada_com_mesmo_valor_e_ignorada(self):
+        parcelas = redistribuir_parcelas(
+            D("300.00"), 3, date(2026, 11, 1), confirmadas={1: D("100.00")}, valor_primeira=D("100.00")
+        )
+
+        assert [p.numero for p in parcelas] == [2, 3]
+
+    def test_primeira_ja_confirmada_nao_muda(self):
+        with pytest.raises(RegraDeNegocioError):
+            redistribuir_parcelas(
+                D("300.00"), 3, date(2026, 11, 1), confirmadas={1: D("100.00")}, valor_primeira=D("90.00")
+            )

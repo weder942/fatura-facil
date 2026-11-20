@@ -14,24 +14,6 @@
       }
     </mat-form-field>
 
-    <div class="form-compra__linha">
-      <mat-form-field>
-        <mat-label>Data da compra</mat-label>
-        <input matInput type="date" formControlName="data" />
-        @if (form.controls.data.hasError('required')) {
-          <mat-error>Informe a data.</mat-error>
-        }
-      </mat-form-field>
-
-      <mat-form-field>
-        <mat-label>Competência da 1ª parcela</mat-label>
-        <input matInput type="month" formControlName="competencia_inicial" />
-        @if (sugerida(); as competencia) {
-          <mat-hint>Sugerida: {{ competencia | competencia }}</mat-hint>
-        }
-      </mat-form-field>
-    </div>
-
     <mat-form-field>
       <mat-label>Descrição</mat-label>
       <input matInput formControlName="descricao" />
@@ -42,7 +24,34 @@
 
     <div class="form-compra__linha">
       <mat-form-field>
-        <mat-label>Valor total</mat-label>
+        <mat-label>Data da compra</mat-label>
+        <input matInput type="date" formControlName="data" />
+        @if (form.controls.data.hasError('required')) {
+          <mat-error>Informe a data.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>{{ parcelada() ? 'Competência da 1ª parcela' : 'Competência' }}</mat-label>
+        <input matInput type="month" formControlName="competencia" />
+        @if (sugerida(); as competencia) {
+          @if (competencia !== form.controls.competencia.value) {
+            <mat-hint>Sugerida: {{ competencia | competencia }}</mat-hint>
+          }
+        }
+        @if (form.controls.competencia.hasError('required')) {
+          <mat-error>Informe a competência.</mat-error>
+        }
+      </mat-form-field>
+    </div>
+
+    <mat-slide-toggle formControlName="parcelada" class="form-compra__parcelada"
+      >Compra parcelada</mat-slide-toggle
+    >
+
+    <div class="form-compra__linha">
+      <mat-form-field>
+        <mat-label>{{ parcelada() ? 'Valor total' : 'Valor' }}</mat-label>
         <span matTextPrefix>R$&nbsp;</span>
         <input matInput formControlName="valor_total" inputmode="decimal" placeholder="0,00" />
         @if (form.controls.valor_total.invalid) {
@@ -50,14 +59,37 @@
         }
       </mat-form-field>
 
+      @if (parcelada()) {
+        <mat-form-field class="form-compra__quantidade">
+          <mat-label>Parcelas</mat-label>
+          <input matInput type="number" min="2" max="120" formControlName="n_parcelas" />
+          @if (form.controls.n_parcelas.invalid) {
+            <mat-error>De 2 a 120.</mat-error>
+          }
+        </mat-form-field>
+      }
+    </div>
+
+    @if (parcelada()) {
       <mat-form-field>
-        <mat-label>Parcelas</mat-label>
-        <input matInput type="number" min="1" max="120" formControlName="n_parcelas" />
-        @if (form.controls.n_parcelas.invalid) {
-          <mat-error>De 1 a 120.</mat-error>
+        <mat-label>Valor da 1ª parcela</mat-label>
+        <span matTextPrefix>R$&nbsp;</span>
+        <input matInput formControlName="valor_primeira" inputmode="decimal" />
+        @if (form.controls.valor_primeira.disabled) {
+          <mat-hint>Confirmada pela fatura.</mat-hint>
+        } @else if (demaisParcelas(); as demais) {
+          <mat-hint>
+            @if (demais.segunda) {
+              2ª: {{ demais.segunda | currency }} ·
+            }
+            {{ demais.quantidade }} × {{ demais.valor | currency }}
+          </mat-hint>
         }
       </mat-form-field>
-    </div>
+      @if (form.hasError('primeiraParcela') && form.controls.valor_primeira.touched) {
+        <p class="form-compra__erro">1ª parcela: {{ form.getError('primeiraParcela') }}</p>
+      }
+    }
 
     @if (compra(); as atual) {
       @if (atual.parcelas.length > 1) {
