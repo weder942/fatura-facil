@@ -1,3 +1,11 @@
+// A página ocupa a altura da janela: a barra fica fixa e o conteúdo rola
+// embaixo dela, para que as telas possam limitar seus blocos à altura visível.
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+}
+
 .layout__barra {
   // No Material 3 a toolbar usa a mesma cor da página; um tom de superfície
   // e uma linha embaixo separam a barra do conteúdo.
@@ -39,5 +47,8 @@
 }
 
 .layout__conteudo {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
   padding: 16px;
 }

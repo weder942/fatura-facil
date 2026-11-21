@@ -1,3 +1,11 @@
+// A visão ocupa a altura disponível do conteúdo; os blocos ficam com o
+// que sobra depois do cabeçalho e do resumo.
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .mes__cabecalho {
   display: flex;
   flex-wrap: wrap;
@@ -46,11 +54,32 @@
   color: var(--mat-sys-error);
 }
 
+// Todos os blocos numa faixa só, com rolagem horizontal quando houver
+// muitas fontes. Cada bloco vai no máximo até o fim da tela e rola por dentro.
 .mes__blocos {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  flex: 1;
+  min-height: 20rem;
+  display: flex;
   gap: 16px;
-  align-items: start;
+  align-items: stretch;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 8px;
+  scroll-snap-type: x proximity;
+}
+
+.mes__bloco {
+  flex: 0 0 min(320px, 85vw);
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  scroll-snap-align: start;
+}
+
+.mes__bloco-conteudo {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .mes__lancamento {
