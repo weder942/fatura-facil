@@ -13,13 +13,16 @@ def _url(competencia):
     return reverse("fatura_facil:mes-detail", args=[competencia])
 
 
-def test_horizonte_marca_o_mes_atual(api_client_logado, mocker):
-    mocker.patch("fatura_facil.views.mes_view.timezone.localdate", return_value=date(2026, 11, 19))
+def test_horizonte_marca_o_mes_em_aberto(api_client_logado, mocker):
+    mocker.patch("fatura_facil.views.mes_view.timezone.localdate", return_value=date(2026, 10, 19))
 
     resposta = api_client_logado.get(reverse("fatura_facil:mes-list"))
 
     assert resposta.status_code == 200
-    assert resposta.json() == [{"competencia": "2026-11", "atual": True}, {"competencia": "2026-12", "atual": False}]
+    assert resposta.json() == [
+        {"competencia": "2026-11", "atual": True},
+        {"competencia": "2026-12", "atual": False},
+    ]
 
 
 def test_visao_do_mes(api_client_logado):

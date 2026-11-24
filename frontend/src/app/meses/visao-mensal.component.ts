@@ -112,8 +112,8 @@ export class VisaoMensalComponent {
     this.router.navigate(['/meses', competencia]);
   }
 
-  protected novaCompra(): void {
-    this.abrirCompra(null);
+  protected novaCompra(fonteId: number | null = null): void {
+    this.abrirCompra(null, fonteId);
   }
 
   protected abrirLancamento(lancamento: LancamentoDoMes): void {
@@ -148,11 +148,12 @@ export class VisaoMensalComponent {
     return valor.startsWith('-');
   }
 
-  private abrirCompra(compraId: number | null): void {
+  private abrirCompra(compraId: number | null, fonteId: number | null = null): void {
     this.aoFechar(
       this.dialog.open<FormCompraComponent, DadosDoFormCompra, boolean>(FormCompraComponent, {
-        data: { compraId },
-        autoFocus: 'first-tabbable',
+        data: { compraId, fonteId },
+        // Vindo do "+" de uma fonte, ela já está escolhida: começa pela descrição.
+        autoFocus: fonteId === null ? 'first-tabbable' : '.form-compra__descricao',
       }),
     );
   }

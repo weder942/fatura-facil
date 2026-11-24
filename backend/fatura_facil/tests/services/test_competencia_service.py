@@ -6,6 +6,7 @@ from fatura_facil.exceptions import RegraDeNegocioError
 from fatura_facil.services.competencia_service import (
     competencia_da_compra_no_cartao,
     competencia_da_data,
+    competencia_em_aberto,
     formatar_competencia,
     interpretar_competencia,
     somar_meses,
@@ -118,3 +119,11 @@ class TestFormatarEInterpretar:
     def test_recusa_formato_invalido(self, valor):
         with pytest.raises(RegraDeNegocioError):
             interpretar_competencia(valor)
+
+
+@pytest.mark.parametrize(
+    ("hoje", "esperado"),
+    [(date(2026, 11, 24), date(2026, 12, 1)), (date(2026, 12, 31), date(2027, 1, 1))],
+)
+def test_mes_em_aberto_e_o_seguinte_ao_do_calendario(hoje, esperado):
+    assert competencia_em_aberto(hoje) == esperado

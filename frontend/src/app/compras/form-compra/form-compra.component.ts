@@ -40,6 +40,8 @@ import {
 
 export interface DadosDoFormCompra {
   compraId: number | null;
+  /** Nova compra já com a fonte escolhida (o "+" do bloco da fonte). */
+  fonteId?: number | null;
 }
 
 const DATA = /^\d{4}-\d{2}-\d{2}$/;
@@ -88,7 +90,8 @@ export class FormCompraComponent {
   private readonly fonteService = inject(FonteService);
   private readonly dialog = inject(MatDialog);
   private readonly dialogRef = inject<MatDialogRef<FormCompraComponent, boolean>>(MatDialogRef);
-  protected readonly compraId = inject<DadosDoFormCompra>(MAT_DIALOG_DATA).compraId;
+  private readonly dados = inject<DadosDoFormCompra>(MAT_DIALOG_DATA);
+  protected readonly compraId = this.dados.compraId;
 
   protected readonly fontes = signal<Fonte[]>([]);
   protected readonly compra = signal<Compra | null>(null);
@@ -172,6 +175,10 @@ export class FormCompraComponent {
           competencia.setValue(sugerida);
         }
       });
+
+    if (this.compraId === null && this.dados.fonteId) {
+      fonte.setValue(this.dados.fonteId);
+    }
 
     parcelada.valueChanges.pipe(takeUntilDestroyed()).subscribe((sim) => {
       n_parcelas.setValidators([

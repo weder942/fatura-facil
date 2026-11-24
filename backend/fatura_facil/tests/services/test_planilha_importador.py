@@ -126,7 +126,7 @@ def test_sem_abas_de_mes(tmp_path):
 def test_divergencia_aparece_quando_ja_havia_lancamento_manual(fontes, planilha):
     from fatura_facil.tests.factories import criar_compra
 
-    criar_compra(fonte=fontes[1], data=date(2026, 10, 10), valor_total=D("1.00"))
+    criar_compra(fonte=fontes[1], data=date(2026, 9, 10), valor_total=D("1.00"))
 
     divergencias = ImportadorDePlanilha().importar([planilha]).divergencias
 

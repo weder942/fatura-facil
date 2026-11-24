@@ -13,7 +13,7 @@ import { Observable } from 'rxjs';
 import { GRUPOS, Grupo, Recorrente, Vigencia } from '../../core/models/recorrente.model';
 import { RecorrenteService } from '../../core/services/recorrente.service';
 import { CompetenciaPipe } from '../../shared/pipes/competencia.pipe';
-import { competenciaAtual } from '../../shared/utils/competencia';
+import { competenciaEmAberto } from '../../shared/utils/competencia';
 import { paraValorComSinal } from '../../shared/utils/dinheiro';
 import { mensagemDeErro } from '../../shared/utils/erro-da-api';
 import { competenciaValida, valorComSinal } from '../../shared/utils/validadores';
@@ -63,15 +63,15 @@ export class FormRecorrenteComponent {
     variavel: [this.dados.recorrente?.variavel ?? false],
     ordem: [this.dados.recorrente?.ordem ?? 0, [Validators.min(0)]],
     valor: ['', this.dados.recorrente ? [] : [Validators.required, valorComSinal]],
-    a_partir_de: [competenciaAtual(), this.dados.recorrente ? [] : [competenciaValida]],
+    a_partir_de: [competenciaEmAberto(), this.dados.recorrente ? [] : [competenciaValida]],
   });
 
   protected readonly reajuste = this.fb.group({
     valor: ['', [Validators.required, valorComSinal]],
-    a_partir_de: [competenciaAtual(), [competenciaValida]],
+    a_partir_de: [competenciaEmAberto(), [competenciaValida]],
   });
 
-  protected readonly fim = this.fb.control(competenciaAtual(), [competenciaValida]);
+  protected readonly fim = this.fb.control(competenciaEmAberto(), [competenciaValida]);
 
   protected salvar(): void {
     if (this.form.invalid || this.salvando()) {
@@ -104,7 +104,7 @@ export class FormRecorrenteComponent {
       this.service.reajustar(atual.id, paraValorComSinal(valor)!, a_partir_de),
       (recorrente) => {
         this.atualizado(recorrente);
-        this.reajuste.reset({ valor: '', a_partir_de: competenciaAtual() });
+        this.reajuste.reset({ valor: '', a_partir_de: competenciaEmAberto() });
       },
     );
   }

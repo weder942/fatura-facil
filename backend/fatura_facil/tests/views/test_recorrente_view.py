@@ -182,3 +182,10 @@ def test_excluir_apaga_vigencias_e_valores_do_mes(api_client_logado):
 
     assert api_client_logado.delete(_url("detail", energia)).status_code == 204
     assert not Recorrente.objects.exists()
+
+
+def test_valor_atual_e_o_do_mes_em_aberto(api_client_logado, hoje):
+    aluguel = criar_recorrente(nome="Aluguel")
+    RecorrenteService().reajustar(aluguel, valor=Decimal("1500.00"), a_partir_de=date(2026, 12, 1))
+
+    assert api_client_logado.get(LISTA).json()[0]["valor_atual"] == "1500.00"

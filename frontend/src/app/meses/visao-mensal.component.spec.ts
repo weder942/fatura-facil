@@ -125,7 +125,7 @@ describe('VisaoMensalComponent', () => {
 
     expect(dialog.open).toHaveBeenCalledWith(
       FormCompraComponent,
-      expect.objectContaining({ data: { compraId: 5 } }),
+      expect.objectContaining({ data: { compraId: 5, fonteId: null } }),
     );
     expect(meses.visao).toHaveBeenCalledTimes(2);
     expect(meses.horizonte).toHaveBeenCalledTimes(2);
@@ -138,9 +138,30 @@ describe('VisaoMensalComponent', () => {
 
     expect(dialog.open).toHaveBeenCalledWith(
       FormCompraComponent,
-      expect.objectContaining({ data: { compraId: null } }),
+      expect.objectContaining({
+        data: { compraId: null, fonteId: null },
+        autoFocus: 'first-tabbable',
+      }),
     );
     expect(meses.visao).toHaveBeenCalledTimes(1);
+  });
+
+  it('o "+" do bloco da fonte abre a nova compra com a fonte escolhida', () => {
+    dialog.open.mockReturnValue({ afterClosed: () => of(true) });
+
+    const botao = fixture.nativeElement.querySelector(
+      '[aria-label="Nova compra em Dinheiro"]',
+    ) as HTMLButtonElement;
+    botao.click();
+
+    expect(dialog.open).toHaveBeenCalledWith(
+      FormCompraComponent,
+      expect.objectContaining({
+        data: { compraId: null, fonteId: 2 },
+        autoFocus: '.form-compra__descricao',
+      }),
+    );
+    expect(meses.visao).toHaveBeenCalledTimes(2);
   });
 
   it('sem fontes, convida a cadastrar', () => {

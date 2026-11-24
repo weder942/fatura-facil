@@ -5,7 +5,7 @@ from django.db import transaction
 
 from fatura_facil.exceptions import RegraDeNegocioError
 from fatura_facil.models import Compra, Fonte, Lancamento, Origem
-from fatura_facil.services.competencia_service import competencia_da_compra_no_cartao, competencia_da_data
+from fatura_facil.services.competencia_service import competencia_da_compra_no_cartao, competencia_em_aberto
 from fatura_facil.services.parcelamento_service import (
     CENTAVO,
     Parcela,
@@ -34,11 +34,13 @@ class CompraService:
 
     @staticmethod
     def competencia_sugerida(fonte: Fonte, data: date) -> date:
+        """Cartão: o mês do vencimento da fatura. Fora do cartão: o mês em aberto
+        na data da compra (o seguinte ao dela), porque as contas acompanham a fatura."""
         if fonte.e_cartao:
             return competencia_da_compra_no_cartao(
                 data, dia_fechamento=fonte.dia_fechamento, dia_vencimento=fonte.dia_vencimento
             )
-        return competencia_da_data(data)
+        return competencia_em_aberto(data)
 
     @transaction.atomic
     def criar(

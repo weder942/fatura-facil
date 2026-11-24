@@ -62,14 +62,14 @@ describe('FormCompraComponent', () => {
   const dialogRef = { close: vi.fn() };
   const dialog = { open: vi.fn() };
 
-  function criar(compraId: number | null = null) {
+  function criar(compraId: number | null = null, fonteId: number | null = null) {
     TestBed.configureTestingModule({
       imports: [FormCompraComponent],
       providers: [
         { provide: CompraService, useValue: compras },
         { provide: FonteService, useValue: fontes },
         { provide: MatDialogRef, useValue: dialogRef },
-        { provide: MAT_DIALOG_DATA, useValue: { compraId } },
+        { provide: MAT_DIALOG_DATA, useValue: { compraId, fonteId } },
         { provide: LOCALE_ID, useValue: 'pt-BR' },
         { provide: DEFAULT_CURRENCY_CODE, useValue: 'BRL' },
       ],
@@ -103,6 +103,14 @@ describe('FormCompraComponent', () => {
     compras.obter.mockReturnValue(of(OCULOS));
     compras.criar.mockReturnValue(of(OCULOS));
     compras.atualizar.mockReturnValue(of(OCULOS));
+  });
+
+  it('nova compra pelo bloco da fonte já vem com a fonte escolhida', () => {
+    criar(null, 1);
+
+    expect(form().controls.fonte.value).toBe(1);
+    form().patchValue({ data: '2026-11-25' });
+    expect(fontes.competenciaSugerida).toHaveBeenLastCalledWith(1, '2026-11-25');
   });
 
   describe('nova compra à vista', () => {

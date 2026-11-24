@@ -3,7 +3,7 @@ from rest_framework import serializers
 
 from fatura_facil.models import Recorrente, ValorRecorrente
 from fatura_facil.serializers.competencia_field import CompetenciaField
-from fatura_facil.services.competencia_service import competencia_da_data
+from fatura_facil.services.competencia_service import competencia_em_aberto
 from fatura_facil.services.recorrente_service import RecorrenteService, valor_vigente
 
 __all__ = [
@@ -48,7 +48,7 @@ class RecorrenteSerializer(serializers.ModelSerializer):
         return fields
 
     def get_valor_atual(self, recorrente) -> str | None:
-        valor = valor_vigente(list(recorrente.valores.all()), competencia_da_data(timezone.localdate()))
+        valor = valor_vigente(list(recorrente.valores.all()), competencia_em_aberto(timezone.localdate()))
         return None if valor is None else f"{valor:.2f}"
 
     def create(self, validated_data):

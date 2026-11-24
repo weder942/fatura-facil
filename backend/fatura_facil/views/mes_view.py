@@ -3,7 +3,7 @@ from rest_framework import viewsets
 from rest_framework.response import Response
 
 from fatura_facil.serializers import CompetenciaDoHorizonteSerializer, VisaoDoMesSerializer
-from fatura_facil.services.competencia_service import competencia_da_data, interpretar_competencia
+from fatura_facil.services.competencia_service import competencia_em_aberto, interpretar_competencia
 from fatura_facil.services.horizonte_service import HorizonteService
 from fatura_facil.services.mes_service import MesService
 
@@ -15,9 +15,9 @@ class MesViewSet(viewsets.ViewSet):
     lookup_value_regex = r"[^/]+"
 
     def list(self, request):
-        """Horizonte de projeção: as competências navegáveis."""
+        """Horizonte de projeção: as competências navegáveis; `atual` marca o mês em aberto."""
         hoje = timezone.localdate()
-        atual = competencia_da_data(hoje)
+        atual = competencia_em_aberto(hoje)
         competencias = [
             {"competencia": competencia, "atual": competencia == atual}
             for competencia in HorizonteService().competencias(hoje)

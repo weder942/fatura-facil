@@ -8,7 +8,7 @@ import { of, throwError } from 'rxjs';
 
 import { Recorrente } from '../../core/models/recorrente.model';
 import { RecorrenteService } from '../../core/services/recorrente.service';
-import { competenciaAtual } from '../../shared/utils/competencia';
+import { competenciaEmAberto } from '../../shared/utils/competencia';
 import { FormRecorrenteComponent } from './form-recorrente.component';
 
 registerLocaleData(localePt);
@@ -91,7 +91,7 @@ describe('FormRecorrenteComponent', () => {
 
     enviar();
 
-    expect(componente().form.controls.a_partir_de.value).toBe(competenciaAtual());
+    expect(componente().form.controls.a_partir_de.value).toBe(competenciaEmAberto());
     expect(service.criar).not.toHaveBeenCalled();
   });
 

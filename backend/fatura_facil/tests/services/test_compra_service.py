@@ -33,8 +33,8 @@ class TestCompetenciaSugerida:
 
         assert CompraService.competencia_sugerida(cartao, date(2026, 11, 25)) == date(2027, 1, 1)
 
-    def test_dinheiro_usa_o_mes_da_data(self):
-        assert CompraService.competencia_sugerida(FonteFactory(), date(2026, 11, 25)) == date(2026, 11, 1)
+    def test_dinheiro_usa_o_mes_seguinte_ao_da_data(self):
+        assert CompraService.competencia_sugerida(FonteFactory(), date(2026, 11, 25)) == date(2026, 12, 1)
 
 
 class TestCriar:
@@ -89,7 +89,7 @@ class TestAtualizar:
         assert compra.lancamentos.get(parcela=1).status == Lancamento.Status.CONFIRMADO
 
     def test_mudar_numero_de_parcelas(self):
-        compra = criar_compra(valor_total=D("300.00"), n_parcelas=3, data=date(2026, 11, 10))
+        compra = criar_compra(valor_total=D("300.00"), n_parcelas=3, data=date(2026, 10, 10))
 
         CompraService().atualizar(compra, n_parcelas=2)
 

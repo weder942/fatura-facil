@@ -50,7 +50,7 @@ Categorias e painel de gastos, rateio e reembolso de terceiros, regras de apelid
 ### 1.3 Compras e parcelamento
 - Lançamento manual de compra: fonte, data, descrição, valor total, nº de parcelas (padrão 1).
 - Para fonte do tipo cartão, a competência da 1ª parcela é calculada pela data e pelo dia de fechamento: se o dia da compra for menor que o dia de fechamento, a compra entra na fatura que fecha naquele mês; senão, na que fecha no mês seguinte. A competência é o mês do **vencimento** dessa fatura (mesmo mês do fechamento se `dia_vencimento > dia_fechamento`, senão o mês seguinte). O usuário pode alterar a competência da 1ª parcela manualmente.
-- Para outras fontes, a competência é o mês da data.
+- Para outras fontes, a competência é o mês seguinte ao da data (decisão de 2026-11-24: as contas são acompanhadas junto com a fatura, então o mês do calendário já está fechado e o app abre no mês seguinte).
 - O sistema gera os lançamentos (parcela k/n) em competências consecutivas.
 - Arredondamento: `valor_parcela = floor(total / n)` em centavos; a sobra vai para a 1ª parcela. A soma das parcelas é sempre igual ao total.
 - Editar uma compra (valor total, nº de parcelas, competência inicial) regera as parcelas que ainda não foram confirmadas por importação. Parcelas confirmadas não mudam. O valor a distribuir é `total − soma das confirmadas`, dividido entre as não confirmadas com a mesma regra de arredondamento.

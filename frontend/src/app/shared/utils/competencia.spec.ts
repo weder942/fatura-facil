@@ -1,11 +1,21 @@
 import { registerLocaleData } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
 
-import { competenciaAtual, nomeDaCompetencia, somarMeses } from './competencia';
+import {
+  competenciaAtual,
+  competenciaEmAberto,
+  nomeDaCompetencia,
+  somarMeses,
+} from './competencia';
 
 registerLocaleData(localePt);
 
 describe('competência', () => {
+  it('o mês em aberto é o seguinte ao do calendário', () => {
+    expect(competenciaEmAberto(new Date(2026, 10, 24))).toBe('2026-12');
+    expect(competenciaEmAberto(new Date(2026, 11, 31))).toBe('2027-01');
+  });
+
   it('competenciaAtual usa o mês da data local', () => {
     expect(competenciaAtual(new Date(2026, 0, 31))).toBe('2026-01');
   });

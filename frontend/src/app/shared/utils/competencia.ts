@@ -7,6 +7,14 @@ export function competenciaAtual(hoje: Date = new Date()): string {
   return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`;
 }
 
+/**
+ * O mês que está sendo planejado: o seguinte ao do calendário. As contas são
+ * acompanhadas junto com a fatura do cartão, então em novembro planeja-se dezembro.
+ */
+export function competenciaEmAberto(hoje: Date = new Date()): string {
+  return somarMeses(competenciaAtual(hoje), 1);
+}
+
 export function somarMeses(competencia: string, meses: number): string {
   const [ano, mes] = partes(competencia);
   const indice = ano * 12 + (mes - 1) + meses;

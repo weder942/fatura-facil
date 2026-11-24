@@ -106,9 +106,21 @@
     }
     @for (bloco of mes.fontes; track bloco.fonte.id) {
       <mat-card appearance="outlined" class="mes__bloco">
-        <mat-card-header>
+        <mat-card-header class="mes__bloco-cabecalho">
           <mat-card-title>{{ bloco.fonte.nome }}</mat-card-title>
           <mat-card-subtitle>{{ bloco.total | currency }}</mat-card-subtitle>
+          @if (bloco.fonte.ativa) {
+            <button
+              mat-icon-button
+              type="button"
+              class="mes__adicionar"
+              (click)="novaCompra(bloco.fonte.id)"
+              [attr.aria-label]="'Nova compra em ' + bloco.fonte.nome"
+              [title]="'Nova compra em ' + bloco.fonte.nome"
+            >
+              <mat-icon>add</mat-icon>
+            </button>
+          }
         </mat-card-header>
         <mat-card-content class="mes__bloco-conteudo">
           @for (lancamento of bloco.lancamentos; track lancamento.id) {

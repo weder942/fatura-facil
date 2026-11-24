@@ -14,6 +14,7 @@ from fatura_facil.exceptions import RegraDeNegocioError
 __all__ = [
     "competencia_da_compra_no_cartao",
     "competencia_da_data",
+    "competencia_em_aberto",
     "formatar_competencia",
     "interpretar_competencia",
     "somar_meses",
@@ -23,8 +24,17 @@ _FORMATO_COMPETENCIA = re.compile(r"^(\d{4})-(\d{2})$")
 
 
 def competencia_da_data(data: date) -> date:
-    """Competência de um lançamento fora do cartão: o mês da própria data."""
+    """O mês do calendário da data (dia 1)."""
     return data.replace(day=1)
+
+
+def competencia_em_aberto(hoje: date) -> date:
+    """O mês que está sendo planejado: o seguinte ao do calendário.
+
+    As contas são acompanhadas junto com a fatura do cartão, então o mês do
+    calendário já está fechado (em novembro, planeja-se dezembro).
+    """
+    return somar_meses(competencia_da_data(hoje), 1)
 
 
 def somar_meses(competencia: date, meses: int) -> date:

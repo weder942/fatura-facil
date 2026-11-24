@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 
 import { authGuard } from './core/guards/auth.guard';
 import { LayoutComponent } from './shared/layout/layout.component';
-import { competenciaAtual } from './shared/utils/competencia';
+import { competenciaEmAberto } from './shared/utils/competencia';
 
 export const routes: Routes = [
   {
@@ -15,7 +15,7 @@ export const routes: Routes = [
     component: LayoutComponent,
     canActivate: [authGuard],
     children: [
-      { path: '', pathMatch: 'full', redirectTo: () => `/meses/${competenciaAtual()}` },
+      { path: '', pathMatch: 'full', redirectTo: () => `/meses/${competenciaEmAberto()}` },
       {
         path: 'meses/:competencia',
         loadComponent: () =>

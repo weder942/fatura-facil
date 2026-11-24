@@ -16,7 +16,7 @@
 
     <mat-form-field>
       <mat-label>Descrição</mat-label>
-      <input matInput formControlName="descricao" />
+      <input matInput formControlName="descricao" class="form-compra__descricao" />
       @if (form.controls.descricao.hasError('required')) {
         <mat-error>Informe a descrição.</mat-error>
       }
