@@ -149,6 +149,18 @@ Categorias e painel de gastos, rateio e reembolso de terceiros, regras de apelid
 ### 3.5 Destaque
 - Lançamentos criados ou atualizados por importação ficam marcados com a origem e o lote; a visão mensal os destaca e permite filtrar por lote.
 
+### Decisões da implementação (2026-11-24, primeira versão)
+- Só PDF do app Bradesco Cartões nesta versão (`services/fatura/bradesco.py`); o leitor usa a posição das palavras na página (pdfplumber), porque as descrições quebram em linhas acima e abaixo da data e o "k/n" às vezes cai na linha de baixo. Novos formatos entram como um par (reconhece, lê) em `services/fatura/leitor.py`.
+- O usuário escolhe a fonte; um PDF com mais de um cartão (titular e adicional) vai todo para ela. O final do cartão aparece na prévia.
+- Competência sugerida: a da compra mais recente da fatura pelas regras da fonte (pagamentos e saldo não contam); o usuário pode trocar, e a prévia é refeita.
+- Prévia e importação são sem estado: a importação reenvia o arquivo e refaz a classificação, aplicando só as decisões que o usuário mudou. O arquivo não fica no servidor; o lote guarda nome e SHA-256.
+- Parcela k/n casa também com a parcela k de competências seguintes (antecipada) e a traz para a competência da fatura. Várias parcelas de uma compra que ainda não existe (ex.: 2/5 a 5/5) viram uma compra só.
+- Suspeitas: casamento global, valor mais próximo primeiro e, no empate, descrição mais parecida. Padrão "é a mesma" (vincular).
+- Ao confirmar, o lançamento guarda o texto da fatura (`Lancamento.texto`) e a compra à vista passa a ter a data da fatura; assim reimportar a mesma fatura não cria nada e não traz suspeitas.
+- Conferência: a soma das linhas, sem pagamentos e saldo anterior, é comparada com o "Total da Fatura" impresso.
+- Crédito novo vira lançamento de estorno sem vínculo com a compra (o vínculo fica para a 2.4).
+- Fora desta versão: .xlsx/.csv, filtro por lote na visão mensal (3.5) e edição de descrições na prévia.
+
 **Critérios de aceite**
 - Importar o PDF de dezembro do Bradesco com as parcelas previstas já cadastradas: parcelas 2/3, 3/3 etc. saem como `existente`; Óculos 138,66 vs previsto 138,67 sai como `existente` (casou pela parcela) e o valor é atualizado.
 - Importar o mesmo PDF duas vezes: a segunda importação não cria nenhum lançamento.

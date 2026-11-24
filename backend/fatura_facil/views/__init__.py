@@ -2,6 +2,7 @@ from fatura_facil.views.auth_view import *
 from fatura_facil.views.avulso_view import *
 from fatura_facil.views.compra_view import *
 from fatura_facil.views.fonte_view import *
+from fatura_facil.views.importacao_view import *
 from fatura_facil.views.lancamento_view import *
 from fatura_facil.views.mes_view import *
 from fatura_facil.views.recorrente_view import *

@@ -32,10 +32,16 @@
     </button>
   </div>
 
-  <button mat-flat-button type="button" (click)="novaCompra()">
-    <mat-icon>add</mat-icon>
-    Nova compra
-  </button>
+  <div class="mes__acoes">
+    <button mat-stroked-button type="button" class="mes__importar" (click)="importarFatura()">
+      <mat-icon>upload_file</mat-icon>
+      Importar fatura
+    </button>
+    <button mat-flat-button type="button" class="mes__nova-compra" (click)="novaCompra()">
+      <mat-icon>add</mat-icon>
+      Nova compra
+    </button>
+  </div>
 </header>
 
 @if (erro(); as mensagem) {

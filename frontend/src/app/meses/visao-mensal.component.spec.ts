@@ -10,6 +10,7 @@ import { BehaviorSubject, of, throwError } from 'rxjs';
 import { VisaoDoMes } from '../core/models/mes.model';
 import { MesService } from '../core/services/mes.service';
 import { FormCompraComponent } from '../compras/form-compra/form-compra.component';
+import { ImportarFaturaComponent } from '../importacao/importar-fatura/importar-fatura.component';
 import { FormAvulsoComponent } from './form-avulso/form-avulso.component';
 import { ValorDoMesComponent } from './valor-do-mes/valor-do-mes.component';
 import { VisaoMensalComponent } from './visao-mensal.component';
@@ -134,7 +135,7 @@ describe('VisaoMensalComponent', () => {
   it('nova compra abre o formulário vazio e não recarrega se cancelar', () => {
     dialog.open.mockReturnValue({ afterClosed: () => of(false) });
 
-    fixture.nativeElement.querySelector('.mes__cabecalho > button').click();
+    fixture.nativeElement.querySelector('.mes__nova-compra').click();
 
     expect(dialog.open).toHaveBeenCalledWith(
       FormCompraComponent,
@@ -162,6 +163,25 @@ describe('VisaoMensalComponent', () => {
       }),
     );
     expect(meses.visao).toHaveBeenCalledTimes(2);
+  });
+
+  it('importar fatura vai para o mês importado e recarrega', () => {
+    const navegar = vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    dialog.open.mockReturnValue({ afterClosed: () => of('2026-12') });
+
+    fixture.nativeElement.querySelector('.mes__importar').click();
+
+    expect(dialog.open).toHaveBeenCalledWith(ImportarFaturaComponent, expect.any(Object));
+    expect(navegar).toHaveBeenCalledWith(['/meses', '2026-12']);
+    expect(meses.horizonte).toHaveBeenCalledTimes(2);
+  });
+
+  it('cancelar a importação não recarrega', () => {
+    dialog.open.mockReturnValue({ afterClosed: () => of(undefined) });
+
+    fixture.nativeElement.querySelector('.mes__importar').click();
+
+    expect(meses.visao).toHaveBeenCalledTimes(1);
   });
 
   it('sem fontes, convida a cadastrar', () => {

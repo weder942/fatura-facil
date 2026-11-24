@@ -6,6 +6,7 @@ from fatura_facil.views import (
     CompraViewSet,
     CsrfView,
     FonteViewSet,
+    ImportacaoViewSet,
     LancamentoViewSet,
     LoginView,
     LogoutView,
@@ -24,6 +25,7 @@ router.register("lancamentos", LancamentoViewSet, basename="lancamento")
 router.register("meses", MesViewSet, basename="mes")
 router.register("recorrentes", RecorrenteViewSet, basename="recorrente")
 router.register("avulsos", AvulsoViewSet, basename="avulso")
+router.register("importacoes", ImportacaoViewSet, basename="importacao")
 
 urlpatterns = [
     path("auth/csrf/", CsrfView.as_view(), name="auth-csrf"),

@@ -1,0 +1,175 @@
+.importar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: min(400px, 80vw);
+}
+
+.importar__progresso {
+  position: sticky;
+  top: 0;
+}
+
+.importar__explicacao,
+.importar__origem,
+.importar__vazio,
+.importar__faltas p {
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0;
+}
+
+.importar__arquivo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.importar__nome-arquivo {
+  color: var(--mat-sys-on-surface-variant);
+  overflow-wrap: anywhere;
+}
+
+.importar__topo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+}
+
+.importar__competencia {
+  width: 12rem;
+}
+
+.importar__total {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--mat-sys-on-surface-variant);
+
+  mat-icon {
+    color: var(--mat-sys-primary);
+  }
+}
+
+.importar__total--diverge mat-icon,
+.importar__total--diverge {
+  color: var(--mat-sys-error);
+}
+
+.importar__contagem {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.importar__selo {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font: var(--mat-sys-label-medium);
+  white-space: nowrap;
+  background: var(--mat-sys-surface-container-highest);
+  color: var(--mat-sys-on-surface);
+}
+
+.importar__selo--nova {
+  background: var(--mat-sys-primary-container);
+  color: var(--mat-sys-on-primary-container);
+}
+
+.importar__selo--suspeita {
+  background: var(--mat-sys-tertiary-container);
+  color: var(--mat-sys-on-tertiary-container);
+}
+
+.importar__selo--ignorada {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.importar__linhas {
+  display: flex;
+  flex-direction: column;
+}
+
+.importar__linha {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr) 3rem 6.5rem 6.5rem 8rem;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.importar__linha--ignorada {
+  opacity: 0.55;
+}
+
+.importar__data,
+.importar__parcela {
+  color: var(--mat-sys-on-surface-variant);
+  font-variant-numeric: tabular-nums;
+}
+
+.importar__descricao {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.importar__vinculo,
+.importar__motivo {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.importar__valor {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.importar__faltas {
+  h3 {
+    font: var(--mat-sys-title-small);
+    margin: 8px 0 4px;
+  }
+
+  ul {
+    margin: 4px 0 0;
+  }
+}
+
+.importar__erro {
+  color: var(--mat-sys-error);
+}
+
+.importar__acoes {
+  display: flex;
+}
+
+.importar__espaco {
+  flex: 1;
+}
+
+// No celular cada linha vira um bloco: descrição em cima, o resto embaixo.
+@media (max-width: 640px) {
+  .importar__linha {
+    grid-template-columns: 3rem minmax(0, 1fr) auto;
+  }
+
+  .importar__descricao {
+    grid-column: 2 / -1;
+  }
+
+  .importar__parcela:empty {
+    display: none;
+  }
+}

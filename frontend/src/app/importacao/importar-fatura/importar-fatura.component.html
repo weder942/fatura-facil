@@ -1,0 +1,168 @@
+<h2 mat-dialog-title>Importar fatura</h2>
+
+<mat-dialog-content class="importar">
+  @if (carregando()) {
+    <mat-progress-bar mode="indeterminate" class="importar__progresso" />
+  }
+
+  @if (previa(); as previa) {
+    <p class="importar__origem">
+      {{ previa.banco }} · emitida em {{ previa.emitida_em | date: 'dd/MM/yyyy' }} ·
+      {{ nomeDaFonte() }}
+    </p>
+
+    <div class="importar__topo">
+      <mat-form-field class="importar__competencia">
+        <mat-label>Competência</mat-label>
+        <input
+          matInput
+          type="month"
+          [formControl]="competencia"
+          (change)="trocarCompetencia()"
+          [readonly]="carregando()"
+        />
+        <mat-hint>Sugerida: {{ previa.competencia_sugerida | competencia }}</mat-hint>
+      </mat-form-field>
+
+      <div class="importar__total" [class.importar__total--diverge]="!totalConfere()">
+        <mat-icon>{{ totalConfere() ? 'check_circle' : 'warning' }}</mat-icon>
+        <span>
+          Lido {{ previa.total_lido | currency }}
+          @if (previa.total_da_fatura) {
+            · fatura {{ previa.total_da_fatura | currency }}
+          }
+        </span>
+      </div>
+    </div>
+
+    <ul class="importar__contagem" aria-label="Resumo da prévia">
+      @for (classe of ordemDasClasses; track classe) {
+        <li [class]="'importar__selo importar__selo--' + classe">
+          {{ contagem().porClasse[classe] }} {{ classificacoes[classe] | lowercase }}
+        </li>
+      }
+    </ul>
+
+    <div class="importar__linhas" role="table" aria-label="Linhas da fatura">
+      @for (linha of previa.linhas; track linha.indice) {
+        <div
+          class="importar__linha"
+          role="row"
+          [class.importar__linha--ignorada]="decisaoDe(linha) === 'ignorar'"
+        >
+          <span class="importar__data" role="cell">{{ linha.data | date: 'dd/MM' }}</span>
+          <span class="importar__descricao" role="cell">
+            <span>{{ linha.descricao }}</span>
+            @if (linha.vinculo; as vinculo) {
+              <small class="importar__vinculo">
+                ↳ {{ vinculo.descricao }} {{ vinculo.parcela }} · {{ vinculo.valor | currency }} ·
+                {{ vinculo.competencia | competencia }}
+              </small>
+            }
+            @if (linha.motivo && linha.classificacao !== 'ignorada') {
+              <small class="importar__motivo">{{ linha.motivo }}</small>
+            }
+          </span>
+          <span class="importar__parcela" role="cell">{{ linha.parcela }}</span>
+          <span class="importar__valor" role="cell">{{ linha.valor | currency }}</span>
+          <span role="cell">
+            <span [class]="'importar__selo importar__selo--' + linha.classificacao">
+              {{ classificacoes[linha.classificacao] }}
+            </span>
+          </span>
+          <span class="importar__decisao" role="cell">
+            @if (linha.decisoes.length > 1) {
+              <mat-select
+                [value]="decisaoDe(linha)"
+                (selectionChange)="decidir(linha, $event.value)"
+                [attr.aria-label]="'O que fazer com ' + linha.descricao"
+                panelWidth=""
+              >
+                @for (decisao of linha.decisoes; track decisao) {
+                  <mat-option [value]="decisao">{{ rotulosDeDecisao[decisao] }}</mat-option>
+                }
+              </mat-select>
+            }
+          </span>
+        </div>
+      } @empty {
+        <p class="importar__vazio">Nenhum lançamento na fatura.</p>
+      }
+    </div>
+
+    @if (previa.faltas.length) {
+      <section class="importar__faltas">
+        <h3>Previstos em {{ previa.competencia | competencia }} que não vieram na fatura</h3>
+        <p>Nada é apagado. Confira se foram antecipados ou cobrados em outro cartão.</p>
+        <ul>
+          @for (falta of previa.faltas; track falta.id) {
+            <li>{{ falta.descricao }} {{ falta.parcela }} · {{ falta.valor | currency }}</li>
+          }
+        </ul>
+      </section>
+    }
+  } @else {
+    <p class="importar__explicacao">
+      Por enquanto, o PDF de extrato do app Bradesco Cartões. Nada é gravado antes de você revisar.
+    </p>
+
+    <mat-form-field>
+      <mat-label>Fonte</mat-label>
+      <mat-select [formControl]="fonte">
+        @for (opcao of fontes(); track opcao.id) {
+          <mat-option [value]="opcao.id">{{ opcao.nome }}</mat-option>
+        }
+      </mat-select>
+      @if (fonte.hasError('required')) {
+        <mat-error>Escolha a fonte da fatura.</mat-error>
+      }
+    </mat-form-field>
+
+    <div class="importar__arquivo">
+      <input
+        #seletor
+        type="file"
+        accept="application/pdf,.pdf"
+        hidden
+        (change)="escolherArquivo($event)"
+      />
+      <button mat-stroked-button type="button" (click)="seletor.click()">
+        <mat-icon>attach_file</mat-icon>
+        Escolher PDF
+      </button>
+      <span class="importar__nome-arquivo">{{
+        arquivo()?.name ?? 'Nenhum arquivo escolhido'
+      }}</span>
+    </div>
+  }
+
+  @if (erro(); as mensagem) {
+    <p class="importar__erro" role="alert">{{ mensagem }}</p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions class="importar__acoes">
+  @if (previa()) {
+    <button mat-button type="button" (click)="voltar()" [disabled]="carregando()">
+      <mat-icon>arrow_back</mat-icon>
+      Voltar
+    </button>
+  }
+  <span class="importar__espaco"></span>
+  <button mat-button type="button" mat-dialog-close>Cancelar</button>
+  @if (previa()) {
+    <button
+      mat-flat-button
+      type="button"
+      (click)="importar()"
+      [disabled]="carregando() || competencia.invalid"
+    >
+      Importar ({{ contagem().porDecisao.inserir }} novas, {{ contagem().porDecisao.vincular }}
+      confirmadas)
+    </button>
+  } @else {
+    <button mat-flat-button type="button" (click)="lerFatura()" [disabled]="carregando()">
+      Ler fatura
+    </button>
+  }
+</mat-dialog-actions>

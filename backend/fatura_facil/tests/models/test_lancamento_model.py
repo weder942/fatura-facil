@@ -4,8 +4,8 @@ from decimal import Decimal
 import pytest
 from django.db import IntegrityError
 
-from fatura_facil.models import Lancamento
-from fatura_facil.tests.factories import criar_compra
+from fatura_facil.models import Lancamento, LoteImportacao
+from fatura_facil.tests.factories import FonteFactory, criar_compra
 
 pytestmark = pytest.mark.django_db
 
@@ -56,3 +56,9 @@ def test_lancamento_sem_compra_usa_o_texto():
 
     assert credito.descricao == "Estorno"
     assert credito.parcela_formatada == ""
+
+
+def test_lote_de_importacao_str():
+    lote = LoteImportacao(fonte=FonteFactory(nome="Bradesco"), competencia=date(2026, 12, 1), nome_arquivo="fatura.pdf")
+
+    assert str(lote) == "Bradesco 2026-12 (fatura.pdf)"

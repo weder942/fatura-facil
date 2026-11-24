@@ -21,6 +21,7 @@ import {
   DadosDoFormCompra,
   FormCompraComponent,
 } from '../compras/form-compra/form-compra.component';
+import { ImportarFaturaComponent } from '../importacao/importar-fatura/importar-fatura.component';
 import { CompetenciaPipe } from '../shared/pipes/competencia.pipe';
 import { DadosDoFormAvulso, FormAvulsoComponent } from './form-avulso/form-avulso.component';
 import { DadosDoValorDoMes, ValorDoMesComponent } from './valor-do-mes/valor-do-mes.component';
@@ -114,6 +115,22 @@ export class VisaoMensalComponent {
 
   protected novaCompra(fonteId: number | null = null): void {
     this.abrirCompra(null, fonteId);
+  }
+
+  /** Depois de importar, mostra o mês da fatura. */
+  protected importarFatura(): void {
+    this.dialog
+      .open<ImportarFaturaComponent, void, string>(ImportarFaturaComponent, {
+        width: 'min(960px, 95vw)',
+        maxWidth: '95vw',
+        autoFocus: 'first-tabbable',
+      })
+      .afterClosed()
+      .pipe(filter(Boolean))
+      .subscribe((competencia) => {
+        this.irPara(competencia);
+        this.recarregar$.next(); // o horizonte pode ter crescido com parcelas novas
+      });
   }
 
   protected abrirLancamento(lancamento: LancamentoDoMes): void {

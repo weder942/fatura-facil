@@ -15,6 +15,12 @@
   margin-bottom: 16px;
 }
 
+.mes__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .mes__navegacao {
   display: flex;
   align-items: center;
