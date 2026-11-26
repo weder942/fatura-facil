@@ -5,6 +5,7 @@ from fatura_facil.views import (
     AvulsoViewSet,
     CompraViewSet,
     CsrfView,
+    FamiliaViewSet,
     FonteViewSet,
     ImportacaoViewSet,
     LancamentoViewSet,
@@ -25,6 +26,7 @@ router.register("lancamentos", LancamentoViewSet, basename="lancamento")
 router.register("meses", MesViewSet, basename="mes")
 router.register("recorrentes", RecorrenteViewSet, basename="recorrente")
 router.register("avulsos", AvulsoViewSet, basename="avulso")
+router.register("familias", FamiliaViewSet, basename="familia")
 router.register("importacoes", ImportacaoViewSet, basename="importacao")
 
 urlpatterns = [

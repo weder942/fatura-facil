@@ -172,6 +172,15 @@ Categorias e painel de gastos, rateio e reembolso de terceiros, regras de apelid
 - Botão "Baixar backup" que entrega o arquivo SQLite (ou um `dumpdata` em JSON).
 - Deploy no PythonAnywhere completo e documentado em `docs/deploy.md` (build do Angular, `collectstatic`, mapeamento de estáticos, variáveis de ambiente, onde fica o SQLite).
 
+### 4.1 Famílias (2026-11-26)
+Assinatura dividida em rodízio, como o Apple iCloud da família: todo mês um membro paga a mensalidade.
+- Na "Nova compra", o botão "Família" troca o parcelamento por: identificação da família (a descrição), mensalidade (o valor), quantidade de membros e um campo por membro, rotulados "1º mês", "2º mês"... O 1º membro paga na competência do 1º mês, o 2º no mês seguinte, e assim por diante.
+- Todo mês entra na fonte o lançamento "Apple icloud Natalia (Natalia - Weder - Gustavo - Edson)" (quem paga e a sequência, como na planilha) e, nos rendimentos, o avulso "Apple icloud (Natalia)" com o mesmo valor. No mês de quem administra a família (marcado com "Eu") não há rendimento.
+- Os lançamentos e rendimentos são gerados até 11 meses depois do mês em aberto e estendidos quando o app é acessado (sem tarefa agendada).
+- Clicar no lançamento ou no rendimento de uma família abre a família: mudar fonte, nome, mensalidade, membros (mais, menos, outra ordem) ou encerrar. Tudo vale **a partir de um mês**, que nunca é anterior ao mês em aberto (os anteriores estão fechados; quando a consolidação 2.3 existir, o limite passa a ser o mês seguinte ao último consolidado). A lista de membros na edição já começa por quem paga no mês escolhido.
+- Mês com a mensalidade confirmada pela fatura não muda. Na importação, a mensalidade casa pelo valor e mantém a identificação de quem paga.
+- Encerrar no primeiro mês da família apaga a família (ela nunca chegou a ter um mês).
+
 ## API (rascunho)
 
 ```

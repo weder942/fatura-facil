@@ -17,8 +17,20 @@ class LancamentoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Lancamento
-        fields = ["id", "compra", "fonte", "competencia", "descricao", "parcela", "valor", "tipo", "status", "origem"]
-        read_only_fields = ["compra", "fonte", "tipo", "status", "origem"]
+        fields = [
+            "id",
+            "compra",
+            "familia",
+            "fonte",
+            "competencia",
+            "descricao",
+            "parcela",
+            "valor",
+            "tipo",
+            "status",
+            "origem",
+        ]
+        read_only_fields = ["compra", "familia", "fonte", "tipo", "status", "origem"]
 
     def update(self, instance, validated_data):
         return CompraService().ajustar_parcela(instance, validated_data["valor"])

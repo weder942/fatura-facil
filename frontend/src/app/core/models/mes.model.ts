@@ -11,11 +11,15 @@ export interface ItemDoMes {
   pendente: boolean;
   /** Fixo com valor sobrescrito só neste mês. */
   ajustado: boolean;
+  /** Avulso gerado por uma família: o membro do mês devolve a mensalidade. */
+  familia: number | null;
 }
 
 export interface LancamentoDoMes {
   id: number;
   compra: number | null;
+  /** Mensalidade de uma família. */
+  familia: number | null;
   fonte: number;
   competencia: string;
   descricao: string;

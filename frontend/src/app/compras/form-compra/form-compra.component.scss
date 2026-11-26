@@ -19,7 +19,10 @@
   flex: 0 1 120px !important;
 }
 
-.form-compra__parcelada {
+.form-compra__opcoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
   margin: 4px 0 12px;
 }
 

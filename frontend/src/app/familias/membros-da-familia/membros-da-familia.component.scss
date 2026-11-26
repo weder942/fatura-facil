@@ -1,0 +1,30 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.membros__quantidade {
+  max-width: 200px;
+}
+
+.membros {
+  display: flex;
+  flex-direction: column;
+}
+
+.membros__membro {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.membros__nome {
+  flex: 1;
+}
+
+.membros__dica {
+  font: var(--mat-sys-body-small);
+  color: var(--mat-sys-on-surface-variant);
+  margin: 0;
+}

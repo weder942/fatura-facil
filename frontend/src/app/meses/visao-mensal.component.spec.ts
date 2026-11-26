@@ -10,6 +10,7 @@ import { BehaviorSubject, of, throwError } from 'rxjs';
 import { VisaoDoMes } from '../core/models/mes.model';
 import { MesService } from '../core/services/mes.service';
 import { FormCompraComponent } from '../compras/form-compra/form-compra.component';
+import { FormFamiliaComponent } from '../familias/form-familia/form-familia.component';
 import { ImportarFaturaComponent } from '../importacao/importar-fatura/importar-fatura.component';
 import { FormAvulsoComponent } from './form-avulso/form-avulso.component';
 import { ValorDoMesComponent } from './valor-do-mes/valor-do-mes.component';
@@ -29,6 +30,7 @@ const NOVEMBRO: VisaoDoMes = {
         {
           id: 10,
           compra: 5,
+          familia: null,
           fonte: 1,
           competencia: '2026-11',
           descricao: 'Passagem',
@@ -132,6 +134,32 @@ describe('VisaoMensalComponent', () => {
     expect(meses.horizonte).toHaveBeenCalledTimes(2);
   });
 
+  it('mensalidade de família abre a família', () => {
+    const [nubank] = NOVEMBRO.fontes;
+    const mensalidade = {
+      ...nubank.lancamentos[0],
+      id: 11,
+      compra: null,
+      familia: 9,
+      parcela: '',
+      descricao: 'Apple icloud Edson (Weder - Edson)',
+    };
+    const semCompra = { ...mensalidade, id: 12, familia: null, descricao: 'Estorno' };
+    meses.visao.mockReturnValue(
+      of({ ...NOVEMBRO, fontes: [{ ...nubank, lancamentos: [mensalidade, semCompra] }] }),
+    );
+    parametros.next(convertToParamMap({ competencia: '2026-11' }));
+    fixture.detectChanges();
+    dialog.open.mockReturnValue({ afterClosed: () => of(false) });
+    const [familia, estorno] = fixture.nativeElement.querySelectorAll('.mes__lancamento');
+
+    expect(familia.textContent).toContain('família');
+    estorno.click(); // sem compra nem família: nada a abrir
+    expect(dialog.open).not.toHaveBeenCalled();
+    familia.click();
+    expect(dialog.open).toHaveBeenCalledWith(FormFamiliaComponent, { data: { familiaId: 9 } });
+  });
+
   it('nova compra abre o formulário vazio e não recarrega se cancelar', () => {
     dialog.open.mockReturnValue({ afterClosed: () => of(false) });
 
@@ -215,6 +243,7 @@ describe('VisaoMensalComponent', () => {
       variavel: true,
       pendente: true,
       ajustado: false,
+      familia: null,
     };
     const reembolso = {
       tipo: 'avulso' as const,
@@ -224,7 +253,9 @@ describe('VisaoMensalComponent', () => {
       variavel: false,
       pendente: false,
       ajustado: false,
+      familia: null,
     };
+    const daFamilia = { ...reembolso, id: 4, descricao: 'Apple icloud (Edson)', familia: 9 };
     const aluguel = {
       ...energia,
       id: 8,
@@ -238,7 +269,7 @@ describe('VisaoMensalComponent', () => {
       meses.visao.mockReturnValue(
         of({
           ...NOVEMBRO,
-          rendimentos: [reembolso],
+          rendimentos: [reembolso, daFamilia],
           fixas: [aluguel, energia],
           resumo: { ...NOVEMBRO.resumo, total_rendimentos: '66.90', total_fixas: '1710.79' },
         }),
@@ -277,6 +308,14 @@ describe('VisaoMensalComponent', () => {
       expect(dialog.open).toHaveBeenCalledWith(FormAvulsoComponent, {
         data: { grupo: 'rendimento', competencia: '2026-11', avulso: reembolso },
       });
+    });
+
+    it('rendimento de família abre a família', () => {
+      expect(linha('Apple icloud').textContent).toContain('família');
+
+      linha('Apple icloud').click();
+
+      expect(dialog.open).toHaveBeenCalledWith(FormFamiliaComponent, { data: { familiaId: 9 } });
     });
 
     it('o + do bloco cria um avulso do mês', () => {
