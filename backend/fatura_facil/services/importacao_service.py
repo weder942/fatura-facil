@@ -176,7 +176,8 @@ class ImportacaoService:
                 compra.data = linha.data
             compra.save(update_fields=["descricao_original", "data", "atualizado_em"])
         lancamento.valor = linha.valor
-        lancamento.texto = linha.descricao[:200]
+        if lancamento.familia_id is None:  # a da família guarda quem paga no mês
+            lancamento.texto = linha.descricao[:200]
         lancamento.competencia = lote.competencia
         lancamento.status = Lancamento.Status.CONFIRMADO
         lancamento.origem = Origem.IMPORTACAO

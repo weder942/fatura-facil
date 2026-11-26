@@ -4,6 +4,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { AvulsoService } from './avulso.service';
 import { CompraService } from './compra.service';
+import { FamiliaService } from './familia.service';
 import { FonteService } from './fonte.service';
 import { MesService } from './mes.service';
 import { RecorrenteService } from './recorrente.service';
@@ -137,5 +138,26 @@ describe('services da API', () => {
     esperar('PATCH', '/api/avulsos/3/', { valor: '90.00' }).flush({});
     service.excluir(3).subscribe();
     esperar('DELETE', '/api/avulsos/3/').flush(null);
+  });
+
+  it('FamiliaService chama os endpoints de famílias', () => {
+    const service = TestBed.inject(FamiliaService);
+    const configuracao = {
+      fonte: 1,
+      nome: 'Apple icloud',
+      valor: '66.90',
+      membros: [{ nome: 'Weder', administrador: true }],
+    };
+
+    service.obter(9).subscribe();
+    esperar('GET', '/api/familias/9/').flush({});
+    service.criar({ ...configuracao, inicio: '2026-12' }).subscribe();
+    esperar('POST', '/api/familias/', { ...configuracao, inicio: '2026-12' }).flush({});
+    service.alterar(9, { ...configuracao, a_partir_de: '2027-03' }).subscribe();
+    esperar('POST', '/api/familias/9/alterar/', { ...configuracao, a_partir_de: '2027-03' }).flush(
+      {},
+    );
+    service.encerrar(9, '2027-03').subscribe();
+    esperar('POST', '/api/familias/9/encerrar/', { a_partir_de: '2027-03' }).flush(null);
   });
 });

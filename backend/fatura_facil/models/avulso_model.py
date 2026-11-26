@@ -1,6 +1,7 @@
 from django.db import models
 
 from fatura_facil.models.choices import Grupo, Origem
+from fatura_facil.models.familia_model import Familia
 
 __all__ = ["Avulso"]
 
@@ -13,6 +14,14 @@ class Avulso(models.Model):
     descricao = models.CharField(max_length=200)
     valor = models.DecimalField(max_digits=12, decimal_places=2)
     origem = models.CharField(max_length=12, choices=Origem.choices, default=Origem.MANUAL)
+    familia = models.ForeignKey(
+        Familia,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="avulsos",
+        help_text="Família cujo membro do mês devolve a mensalidade.",
+    )
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)
 

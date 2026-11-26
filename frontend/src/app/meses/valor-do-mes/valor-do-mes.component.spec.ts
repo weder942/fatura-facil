@@ -22,6 +22,7 @@ describe('ValorDoMesComponent', () => {
     variavel: true,
     pendente: true,
     ajustado: false,
+    familia: null,
   };
 
   function criar(item: Partial<ItemDoMes> = {}) {

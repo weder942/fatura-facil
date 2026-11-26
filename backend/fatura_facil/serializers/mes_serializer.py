@@ -29,6 +29,7 @@ class _ItemDoMesSerializer(serializers.Serializer):
     variavel = serializers.BooleanField()
     pendente = serializers.BooleanField()
     ajustado = serializers.BooleanField()
+    familia = serializers.IntegerField(allow_null=True)
 
 
 class _ResumoDoMesSerializer(serializers.Serializer):

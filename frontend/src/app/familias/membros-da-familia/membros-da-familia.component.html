@@ -1,0 +1,63 @@
+<mat-form-field class="membros__quantidade">
+  <mat-label>Quantidade de membros</mat-label>
+  <input
+    #quantidade
+    matInput
+    type="number"
+    min="1"
+    [max]="maximo"
+    [value]="form().nomes.length"
+    (input)="definirQuantidade(quantidade.value)"
+  />
+  <mat-hint>De 1 a {{ maximo }}.</mat-hint>
+</mat-form-field>
+
+<mat-radio-group
+  class="membros"
+  [formControl]="form().administrador"
+  aria-label="Quem administra a família"
+>
+  @for (
+    campo of form().nomes.controls;
+    track campo;
+    let i = $index, primeiro = $first, ultimo = $last
+  ) {
+    <div class="membros__membro">
+      <mat-form-field class="membros__nome">
+        <mat-label>{{ i + 1 }}º mês</mat-label>
+        <input matInput [formControl]="campo" class="membros__campo" />
+        @if (mesDe(i); as mes) {
+          <mat-hint>Paga em {{ mes | competencia }}</mat-hint>
+        }
+        @if (campo.hasError('required')) {
+          <mat-error>Informe o nome.</mat-error>
+        }
+      </mat-form-field>
+      <mat-radio-button [value]="i" [attr.title]="'Administro: sem rendimento no meu mês'"
+        >Eu</mat-radio-button
+      >
+      <button
+        mat-icon-button
+        type="button"
+        [disabled]="primeiro"
+        (click)="mover(i, -1)"
+        [attr.aria-label]="'Subir o ' + (i + 1) + 'º'"
+      >
+        <mat-icon>arrow_upward</mat-icon>
+      </button>
+      <button
+        mat-icon-button
+        type="button"
+        [disabled]="ultimo"
+        (click)="mover(i, 1)"
+        [attr.aria-label]="'Descer o ' + (i + 1) + 'º'"
+      >
+        <mat-icon>arrow_downward</mat-icon>
+      </button>
+    </div>
+  }
+</mat-radio-group>
+<p class="membros__dica">
+  Cada mês um membro paga, nesta ordem, e o valor dele entra nos rendimentos. Marque "Eu" no seu
+  nome: no seu mês não há o que receber.
+</p>

@@ -7,6 +7,7 @@ export interface Avulso {
   competencia: string;
   descricao: string;
   valor: string;
+  familia?: number | null;
 }
 
-export type AvulsoEntrada = Omit<Avulso, 'id'>;
+export type AvulsoEntrada = Omit<Avulso, 'id' | 'familia'>;

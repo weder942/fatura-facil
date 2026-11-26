@@ -1,0 +1,102 @@
+<h2 mat-dialog-title>{{ familia()?.nome ?? 'Família' }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="salvar()">
+  <mat-dialog-content class="form-familia">
+    @if (familia(); as atual) {
+      @if (atual.ate) {
+        <p class="form-familia__encerrada" role="status">
+          Encerrada: a última mensalidade foi em {{ atual.ate | competencia }}.
+        </p>
+      } @else {
+        <p class="form-familia__explicacao">
+          As mudanças valem a partir do mês escolhido. Os meses anteriores continuam como estão.
+        </p>
+      }
+
+      <mat-form-field>
+        <mat-label>A partir de</mat-label>
+        <input
+          matInput
+          type="month"
+          formControlName="a_partir_de"
+          [min]="atual.primeira_editavel"
+        />
+        @if (antesDoPermitido()) {
+          <mat-hint class="form-familia__aviso"
+            >Os meses antes de {{ atual.primeira_editavel | competencia }} já estão
+            fechados.</mat-hint
+          >
+        } @else {
+          <mat-hint>Nele paga o 1º da lista.</mat-hint>
+        }
+        @if (form.controls.a_partir_de.invalid) {
+          <mat-error>Informe o mês.</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field>
+        <mat-label>Fonte</mat-label>
+        <mat-select formControlName="fonte">
+          @for (fonte of fontesDisponiveis(); track fonte.id) {
+            <mat-option [value]="fonte.id">{{ fonte.nome }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <div class="form-familia__linha">
+        <mat-form-field>
+          <mat-label>Identificação da família</mat-label>
+          <input matInput formControlName="nome" />
+          @if (form.controls.nome.hasError('required')) {
+            <mat-error>Informe a família.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>Mensalidade (R$)</mat-label>
+          <input matInput formControlName="valor" inputmode="decimal" placeholder="0,00" />
+          @if (form.controls.valor.invalid) {
+            <mat-error>Valor inválido (ex.: 66,90).</mat-error>
+          }
+        </mat-form-field>
+      </div>
+
+      @if (!atual.ate) {
+        <app-membros-da-familia [form]="membros" [inicio]="form.controls.a_partir_de.value" />
+      } @else {
+        <p>
+          {{ atual.membros.length }} membro(s):
+          @for (membro of atual.membros; track $index; let ultimo = $last) {
+            {{ membro.nome }}{{ ultimo ? '' : ' - ' }}
+          }
+        </p>
+      }
+    }
+
+    @if (erro(); as mensagem) {
+      <p class="form-familia__erro" role="alert">{{ mensagem }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="form-familia__acoes">
+    @if (familia() && !familia()!.ate) {
+      <button
+        mat-button
+        type="button"
+        class="form-familia__encerrar"
+        (click)="encerrar()"
+        [disabled]="salvando()"
+      >
+        <mat-icon>event_busy</mat-icon>
+        Encerrar
+      </button>
+    }
+    <span class="form-familia__espaco"></span>
+    <button mat-button type="button" mat-dialog-close>
+      {{ familia()?.ate ? 'Fechar' : 'Cancelar' }}
+    </button>
+    @if (familia() && !familia()!.ate) {
+      <button mat-flat-button type="submit" [disabled]="salvando()">Salvar</button>
+    }
+  </mat-dialog-actions>
+</form>

@@ -1,4 +1,6 @@
-<h2 mat-dialog-title>{{ compraId === null ? 'Nova compra' : 'Editar compra' }}</h2>
+<h2 mat-dialog-title>
+  {{ compraId !== null ? 'Editar compra' : familia() ? 'Nova família' : 'Nova compra' }}
+</h2>
 
 <form [formGroup]="form" (ngSubmit)="salvar()">
   <mat-dialog-content class="form-compra">
@@ -15,16 +17,19 @@
     </mat-form-field>
 
     <mat-form-field>
-      <mat-label>Descrição</mat-label>
+      <mat-label>{{ familia() ? 'Identificação da família' : 'Descrição' }}</mat-label>
       <input matInput formControlName="descricao" class="form-compra__descricao" />
+      @if (familia()) {
+        <mat-hint>Ex.: Apple icloud</mat-hint>
+      }
       @if (form.controls.descricao.hasError('required')) {
-        <mat-error>Informe a descrição.</mat-error>
+        <mat-error>{{ familia() ? 'Informe a família.' : 'Informe a descrição.' }}</mat-error>
       }
     </mat-form-field>
 
     <div class="form-compra__linha">
       <mat-form-field>
-        <mat-label>Data da compra</mat-label>
+        <mat-label>{{ familia() ? 'Data da 1ª cobrança' : 'Data da compra' }}</mat-label>
         <input matInput type="date" formControlName="data" />
         @if (form.controls.data.hasError('required')) {
           <mat-error>Informe a data.</mat-error>
@@ -32,7 +37,13 @@
       </mat-form-field>
 
       <mat-form-field>
-        <mat-label>{{ parcelada() ? 'Competência da 1ª parcela' : 'Competência' }}</mat-label>
+        <mat-label>{{
+          familia()
+            ? 'Competência do 1º mês'
+            : parcelada()
+              ? 'Competência da 1ª parcela'
+              : 'Competência'
+        }}</mat-label>
         <input matInput type="month" formControlName="competencia" />
         @if (sugerida(); as competencia) {
           @if (competencia !== form.controls.competencia.value) {
@@ -45,13 +56,24 @@
       </mat-form-field>
     </div>
 
-    <mat-slide-toggle formControlName="parcelada" class="form-compra__parcelada"
-      >Compra parcelada</mat-slide-toggle
-    >
+    <div class="form-compra__opcoes">
+      @if (compraId === null) {
+        <mat-slide-toggle formControlName="familia" class="form-compra__familia"
+          >Família</mat-slide-toggle
+        >
+      }
+      @if (!familia()) {
+        <mat-slide-toggle formControlName="parcelada" class="form-compra__parcelada"
+          >Compra parcelada</mat-slide-toggle
+        >
+      }
+    </div>
 
     <div class="form-compra__linha">
       <mat-form-field>
-        <mat-label>{{ parcelada() ? 'Valor total (R$)' : 'Valor (R$)' }}</mat-label>
+        <mat-label>{{
+          familia() ? 'Mensalidade (R$)' : parcelada() ? 'Valor total (R$)' : 'Valor (R$)'
+        }}</mat-label>
         <input matInput formControlName="valor_total" inputmode="decimal" placeholder="0,00" />
         @if (form.controls.valor_total.invalid) {
           <mat-error>Valor inválido (ex.: 1.234,56).</mat-error>
@@ -68,6 +90,10 @@
         </mat-form-field>
       }
     </div>
+
+    @if (familia()) {
+      <app-membros-da-familia [form]="membros" [inicio]="form.controls.competencia.value" />
+    }
 
     @if (parcelada()) {
       <mat-form-field>

@@ -11,4 +11,5 @@ class AvulsoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Avulso
-        fields = ["id", "grupo", "competencia", "descricao", "valor"]
+        fields = ["id", "grupo", "competencia", "descricao", "valor", "familia"]
+        read_only_fields = ["familia"]

@@ -21,12 +21,18 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { catchError, filter, map, merge, of, switchMap } from 'rxjs';
+import { Observable, catchError, filter, map, merge, of, switchMap } from 'rxjs';
 
 import { Compra, CompraEntrada, Parcela } from '../../core/models/compra.model';
 import { Fonte } from '../../core/models/fonte.model';
 import { CompraService } from '../../core/services/compra.service';
+import { FamiliaService } from '../../core/services/familia.service';
 import { FonteService } from '../../core/services/fonte.service';
+import { MembrosDaFamiliaComponent } from '../../familias/membros-da-familia/membros-da-familia.component';
+import {
+  criarFormDeMembros,
+  membrosDoForm,
+} from '../../familias/membros-da-familia/membros-da-familia';
 import { ConfirmacaoDialogComponent } from '../../shared/confirmacao-dialog/confirmacao-dialog.component';
 import { CompetenciaPipe } from '../../shared/pipes/competencia.pipe';
 import { mensagemDeErro } from '../../shared/utils/erro-da-api';
@@ -67,13 +73,18 @@ const primeiraParcelaValida: ValidatorFn = (grupo) => {
     : null;
 };
 
-/** Cria ou edita uma compra (e ajusta parcelas). Fecha com `true` se algo mudou. */
+/**
+ * Cria ou edita uma compra (e ajusta parcelas). Na criação, "Família" troca a
+ * compra por uma mensalidade em rodízio entre os membros. Fecha com `true` se
+ * algo mudou.
+ */
 @Component({
   selector: 'app-form-compra',
   imports: [
     ReactiveFormsModule,
     CurrencyPipe,
     CompetenciaPipe,
+    MembrosDaFamiliaComponent,
     MatButtonModule,
     MatDialogModule,
     MatFormFieldModule,
@@ -87,6 +98,7 @@ const primeiraParcelaValida: ValidatorFn = (grupo) => {
 })
 export class FormCompraComponent {
   private readonly compras = inject(CompraService);
+  private readonly familias = inject(FamiliaService);
   private readonly fonteService = inject(FonteService);
   private readonly dialog = inject(MatDialog);
   private readonly dialogRef = inject<MatDialogRef<FormCompraComponent, boolean>>(MatDialogRef);
@@ -111,6 +123,7 @@ export class FormCompraComponent {
       data: ['', Validators.required],
       descricao: ['', [Validators.required, Validators.maxLength(200)]],
       parcelada: [false],
+      familia: [false],
       valor_total: ['', [Validators.required, valorEmReais]],
       n_parcelas: [1, [Validators.required, Validators.min(1), Validators.max(120)]],
       valor_primeira: [''],
@@ -122,6 +135,11 @@ export class FormCompraComponent {
   protected readonly parcelada = toSignal(this.form.controls.parcelada.valueChanges, {
     initialValue: false,
   });
+  protected readonly familia = toSignal(this.form.controls.familia.valueChanges, {
+    initialValue: false,
+  });
+  /** Começa com um membro, você, que administra a família. */
+  protected readonly membros = criarFormDeMembros([{ nome: '', administrador: true }]);
   // getRawValue inclui a 1ª parcela mesmo desabilitada (quando já confirmada).
   private readonly valores = toSignal(
     this.form.valueChanges.pipe(map(() => this.form.getRawValue())),
@@ -154,8 +172,16 @@ export class FormCompraComponent {
       this.carregarCompra(this.compraId);
     }
 
-    const { fonte, data, parcelada, valor_total, n_parcelas, valor_primeira, competencia } =
-      this.form.controls;
+    const {
+      fonte,
+      data,
+      parcelada,
+      familia,
+      valor_total,
+      n_parcelas,
+      valor_primeira,
+      competencia,
+    } = this.form.controls;
 
     // Competência sugerida pela fonte e pela data. Preenche o campo enquanto o
     // usuário não escolher outra à mão.
@@ -180,6 +206,13 @@ export class FormCompraComponent {
       fonte.setValue(this.dados.fonteId);
     }
 
+    // Família é uma mensalidade: não tem parcelas.
+    familia.valueChanges.pipe(takeUntilDestroyed()).subscribe((sim) => {
+      if (sim) {
+        parcelada.setValue(false);
+      }
+    });
+
     parcelada.valueChanges.pipe(takeUntilDestroyed()).subscribe((sim) => {
       n_parcelas.setValidators([
         Validators.required,
@@ -203,14 +236,28 @@ export class FormCompraComponent {
   }
 
   protected salvar(): void {
-    if (this.form.invalid || this.salvando()) {
+    const familia = this.form.controls.familia.value;
+    if (this.form.invalid || (familia && this.membros.nomes.invalid) || this.salvando()) {
       this.form.markAllAsTouched();
+      this.membros.nomes.markAllAsTouched();
       return;
     }
     this.salvando.set(true);
     this.erro.set(null);
 
     const valores = this.form.getRawValue();
+    if (familia) {
+      this.concluir(
+        this.familias.criar({
+          fonte: valores.fonte!,
+          nome: valores.descricao.trim(),
+          valor: paraValorDaApi(valores.valor_total)!,
+          inicio: valores.competencia,
+          membros: membrosDoForm(this.membros),
+        }),
+      );
+      return;
+    }
     const entrada: CompraEntrada = {
       fonte: valores.fonte!,
       data: valores.data,
@@ -223,10 +270,14 @@ export class FormCompraComponent {
       entrada.valor_primeira_parcela = paraValorDaApi(valores.valor_primeira)!;
     }
 
-    const requisicao =
+    this.concluir(
       this.compraId === null
         ? this.compras.criar(entrada)
-        : this.compras.atualizar(this.compraId, entrada);
+        : this.compras.atualizar(this.compraId, entrada),
+    );
+  }
+
+  private concluir(requisicao: Observable<unknown>): void {
     requisicao.subscribe({
       next: () => this.dialogRef.close(true),
       error: (erro) => {

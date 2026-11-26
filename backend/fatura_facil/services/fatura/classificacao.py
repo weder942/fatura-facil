@@ -192,6 +192,14 @@ def _casamento_exato(linha: LinhaDaFatura, estado: _Estado) -> Lancamento | None
             and lancamento.valor == linha.valor
         ),
         None,
+    ) or next(
+        # Mensalidade de família: uma por mês, casa pelo valor.
+        (
+            lancamento
+            for lancamento in _da_competencia(estado)
+            if lancamento.familia_id is not None and lancamento.valor == linha.valor
+        ),
+        None,
     )
 
 

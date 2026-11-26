@@ -3,6 +3,7 @@ from django.db.models import Q
 
 from fatura_facil.models.choices import Origem
 from fatura_facil.models.compra_model import Compra
+from fatura_facil.models.familia_model import Familia
 from fatura_facil.models.fonte_model import Fonte
 from fatura_facil.models.lote_importacao_model import LoteImportacao
 
@@ -29,7 +30,7 @@ class Lancamento(models.Model):
     texto = models.CharField(
         max_length=200,
         blank=True,
-        help_text="Descrição de lançamento sem compra (ex.: estorno), ou o texto da fatura que o confirmou.",
+        help_text="Descrição de lançamento sem compra (estorno, família), ou o texto da fatura que o confirmou.",
     )
     tipo = models.CharField(max_length=10, choices=Tipo.choices, default=Tipo.NORMAL)
     status = models.CharField(max_length=10, choices=Status.choices, default=Status.PREVISTO)
@@ -41,6 +42,14 @@ class Lancamento(models.Model):
         blank=True,
         related_name="lancamentos",
         help_text="Fatura importada que criou ou confirmou este lançamento.",
+    )
+    familia = models.ForeignKey(
+        Familia,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="lancamentos",
+        help_text="Mensalidade da família que gerou este lançamento.",
     )
     criado_em = models.DateTimeField(auto_now_add=True)
     atualizado_em = models.DateTimeField(auto_now=True)

@@ -28,6 +28,7 @@ def test_cria(api_client_logado):
         "competencia": "2026-11",
         "descricao": "Icloud (Natalia)",
         "valor": "66.90",
+        "familia": None,
     }
 
 

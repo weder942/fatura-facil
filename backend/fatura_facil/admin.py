@@ -1,6 +1,16 @@
 from django.contrib import admin
 
-from fatura_facil.models import Avulso, Compra, Fonte, Lancamento, Recorrente, ValorDoMes, ValorRecorrente
+from fatura_facil.models import (
+    Avulso,
+    Compra,
+    Familia,
+    Fonte,
+    Lancamento,
+    MembroDaFamilia,
+    Recorrente,
+    ValorDoMes,
+    ValorRecorrente,
+)
 
 
 @admin.register(Fonte)
@@ -51,3 +61,14 @@ class AvulsoAdmin(admin.ModelAdmin):
     list_display = ["descricao", "grupo", "competencia", "valor", "origem"]
     list_filter = ["grupo", "origem", "competencia"]
     search_fields = ["descricao"]
+
+
+class MembroDaFamiliaInline(admin.TabularInline):
+    model = MembroDaFamilia
+    extra = 0
+
+
+@admin.register(Familia)
+class FamiliaAdmin(admin.ModelAdmin):
+    list_display = ["nome", "fonte", "valor", "inicio", "ate", "gerado_ate"]
+    inlines = [MembroDaFamiliaInline]

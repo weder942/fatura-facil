@@ -22,6 +22,7 @@ class ItemDoMes:
     variavel: bool = False
     pendente: bool = False  # variável sem o valor real do mês: o valor é estimativa
     ajustado: bool = False  # fixo com valor sobrescrito só neste mês
+    familia: int | None = None  # avulso gerado por uma família (o membro do mês devolve a mensalidade)
 
 
 def valor_vigente(valores: list[ValorRecorrente], competencia: date) -> Decimal | None:
@@ -103,7 +104,14 @@ class RecorrenteService:
         itens = [item for r in recorrentes if (item := self._item(r, competencia)) is not None]
         avulsos = Avulso.objects.filter(grupo=grupo, competencia=competencia)
         itens.extend(
-            ItemDoMes(tipo="avulso", id=avulso.pk, descricao=avulso.descricao, valor=avulso.valor) for avulso in avulsos
+            ItemDoMes(
+                tipo="avulso",
+                id=avulso.pk,
+                descricao=avulso.descricao,
+                valor=avulso.valor,
+                familia=avulso.familia_id,
+            )
+            for avulso in avulsos
         )
         return itens
 

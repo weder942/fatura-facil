@@ -21,6 +21,13 @@ export function somarMeses(competencia: string, meses: number): string {
   return `${Math.floor(indice / 12)}-${String((indice % 12) + 1).padStart(2, '0')}`;
 }
 
+/** Quantos meses de `de` até `ate` (negativo se `ate` vem antes). */
+export function mesesEntre(de: string, ate: string): number {
+  const [anoDe, mesDe] = partes(de);
+  const [anoAte, mesAte] = partes(ate);
+  return (anoAte - anoDe) * 12 + mesAte - mesDe;
+}
+
 /** "2026-11" → "novembro de 2026". */
 export function nomeDaCompetencia(competencia: string): string {
   const [ano, mes] = partes(competencia);

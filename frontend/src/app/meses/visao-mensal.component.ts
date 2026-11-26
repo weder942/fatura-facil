@@ -21,6 +21,10 @@ import {
   DadosDoFormCompra,
   FormCompraComponent,
 } from '../compras/form-compra/form-compra.component';
+import {
+  DadosDoFormFamilia,
+  FormFamiliaComponent,
+} from '../familias/form-familia/form-familia.component';
 import { ImportarFaturaComponent } from '../importacao/importar-fatura/importar-fatura.component';
 import { CompetenciaPipe } from '../shared/pipes/competencia.pipe';
 import { DadosDoFormAvulso, FormAvulsoComponent } from './form-avulso/form-avulso.component';
@@ -136,6 +140,8 @@ export class VisaoMensalComponent {
   protected abrirLancamento(lancamento: LancamentoDoMes): void {
     if (lancamento.compra !== null) {
       this.abrirCompra(lancamento.compra);
+    } else if (lancamento.familia !== null) {
+      this.abrirFamilia(lancamento.familia);
     }
   }
 
@@ -147,8 +153,12 @@ export class VisaoMensalComponent {
     );
   }
 
-  /** Recorrente: valor deste mês. Avulso: editar ou excluir. */
+  /** Recorrente: valor deste mês. Avulso: editar ou excluir. De família: a família. */
   protected abrirItem(item: ItemDoMes, grupo: Grupo): void {
+    if (item.familia) {
+      this.abrirFamilia(item.familia);
+      return;
+    }
     const competencia = this.competencia();
     this.aoFechar(
       item.tipo === 'recorrente'
@@ -171,6 +181,14 @@ export class VisaoMensalComponent {
         data: { compraId, fonteId },
         // Vindo do "+" de uma fonte, ela já está escolhida: começa pela descrição.
         autoFocus: fonteId === null ? 'first-tabbable' : '.form-compra__descricao',
+      }),
+    );
+  }
+
+  private abrirFamilia(familiaId: number): void {
+    this.aoFechar(
+      this.dialog.open<FormFamiliaComponent, DadosDoFormFamilia, boolean>(FormFamiliaComponent, {
+        data: { familiaId },
       }),
     );
   }

@@ -6,6 +6,7 @@ import {
   competenciaEmAberto,
   nomeDaCompetencia,
   somarMeses,
+  mesesEntre,
 } from './competencia';
 
 registerLocaleData(localePt);
@@ -27,6 +28,11 @@ describe('competência', () => {
     ['2026-12', 25, '2029-01'],
   ])('somarMeses(%s, %i) = %s', (competencia, meses, esperado) => {
     expect(somarMeses(competencia, meses)).toBe(esperado);
+  });
+
+  it('mesesEntre conta os meses, negativo para trás', () => {
+    expect(mesesEntre('2026-12', '2027-03')).toBe(3);
+    expect(mesesEntre('2027-03', '2026-12')).toBe(-3);
   });
 
   it('nomeDaCompetencia em português', () => {

@@ -9,6 +9,8 @@ import { of, throwError } from 'rxjs';
 import { Compra } from '../../core/models/compra.model';
 import { Fonte } from '../../core/models/fonte.model';
 import { CompraService } from '../../core/services/compra.service';
+import { FamiliaService } from '../../core/services/familia.service';
+import { FormDeMembros } from '../../familias/membros-da-familia/membros-da-familia';
 import { FonteService } from '../../core/services/fonte.service';
 import { FormCompraComponent } from './form-compra.component';
 
@@ -59,6 +61,7 @@ describe('FormCompraComponent', () => {
     ajustarParcela: vi.fn(),
   };
   const fontes = { listar: vi.fn(), competenciaSugerida: vi.fn() };
+  const familias = { criar: vi.fn() };
   const dialogRef = { close: vi.fn() };
   const dialog = { open: vi.fn() };
 
@@ -68,6 +71,7 @@ describe('FormCompraComponent', () => {
       providers: [
         { provide: CompraService, useValue: compras },
         { provide: FonteService, useValue: fontes },
+        { provide: FamiliaService, useValue: familias },
         { provide: MatDialogRef, useValue: dialogRef },
         { provide: MAT_DIALOG_DATA, useValue: { compraId, fonteId } },
         { provide: LOCALE_ID, useValue: 'pt-BR' },
@@ -82,6 +86,7 @@ describe('FormCompraComponent', () => {
   const componente = () =>
     fixture.componentInstance as unknown as {
       form: FormCompraComponent['form'];
+      membros: FormDeMembros;
       fontesDisponiveis: () => Fonte[];
     };
   const form = () => componente().form;
@@ -111,6 +116,63 @@ describe('FormCompraComponent', () => {
     expect(form().controls.fonte.value).toBe(1);
     form().patchValue({ data: '2026-11-25' });
     expect(fontes.competenciaSugerida).toHaveBeenLastCalledWith(1, '2026-11-25');
+  });
+
+  describe('família', () => {
+    beforeEach(() => {
+      familias.criar.mockReturnValue(of({}));
+      criar();
+      form().controls.parcelada.setValue(true);
+      form().controls.familia.setValue(true);
+    });
+
+    it('troca o parcelamento pelos campos da família', () => {
+      expect(form().controls.parcelada.value).toBe(false);
+      const conteudo = texto();
+      expect(conteudo).toContain('Nova família');
+      expect(conteudo).toContain('Identificação da família');
+      expect(conteudo).toContain('Mensalidade (R$)');
+      expect(conteudo).toContain('Data da 1ª cobrança');
+      expect(conteudo).toContain('Competência do 1º mês');
+      expect(conteudo).toContain('Quantidade de membros');
+      expect(conteudo).toContain('1º mês');
+      expect(conteudo).not.toContain('Compra parcelada');
+    });
+
+    it('cria a família com os membros na ordem', () => {
+      preencherBasico();
+      form().patchValue({ descricao: 'Apple icloud', valor_total: '66,90' });
+      const { nomes } = componente().membros;
+      nomes.at(0).setValue('Weder');
+      enviar();
+
+      expect(familias.criar).toHaveBeenCalledWith({
+        fonte: 1,
+        nome: 'Apple icloud',
+        valor: '66.90',
+        inicio: '2027-01',
+        membros: [{ nome: 'Weder', administrador: true }],
+      });
+      expect(compras.criar).not.toHaveBeenCalled();
+      expect(dialogRef.close).toHaveBeenCalledWith(true);
+    });
+
+    it('exige o nome dos membros', () => {
+      preencherBasico();
+      form().patchValue({ valor_total: '66,90' });
+
+      enviar();
+
+      expect(familias.criar).not.toHaveBeenCalled();
+      expect(texto()).toContain('Informe o nome.');
+    });
+
+    it('editar compra não oferece família', () => {
+      TestBed.resetTestingModule();
+      criar(7);
+
+      expect(texto()).not.toContain('Família');
+    });
   });
 
   describe('nova compra à vista', () => {

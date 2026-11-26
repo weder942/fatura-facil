@@ -94,6 +94,8 @@
                   estimado
                 } @else if (item.ajustado) {
                   ajustado
+                } @else if (item.familia) {
+                  família
                 } @else if (item.tipo === 'avulso') {
                   só este mês
                 }
@@ -137,7 +139,9 @@
               (click)="abrirLancamento(lancamento)"
             >
               <span class="mes__descricao">{{ lancamento.descricao }}</span>
-              <span class="mes__parcela">{{ lancamento.parcela }}</span>
+              <span class="mes__parcela">{{
+                lancamento.familia ? 'família' : lancamento.parcela
+              }}</span>
               <span class="mes__valor">{{ lancamento.valor | currency }}</span>
             </button>
           } @empty {
