@@ -1,0 +1,61 @@
+<header class="cofrinhos__cabecalho">
+  <div>
+    <h1>Cofrinhos</h1>
+    @if (selicAtual(); as selic) {
+      <p class="cofrinhos__selic">
+        Selic {{ selic.selic | number: '1.0-2' }}% · CDI {{ selic.cdi | number: '1.0-2' }}% ao ano
+      </p>
+    }
+  </div>
+  <div class="cofrinhos__acoes">
+    <button mat-button type="button" (click)="abrirSelic()">
+      <mat-icon>percent</mat-icon>
+      Selic
+    </button>
+    <button mat-button type="button" (click)="abrirBancos()">
+      <mat-icon>account_balance</mat-icon>
+      Bancos
+    </button>
+    <button mat-flat-button type="button" (click)="novo()" [disabled]="!podeCriar()">
+      <mat-icon>add</mat-icon>
+      Novo cofrinho
+    </button>
+  </div>
+</header>
+
+@if (carregado() && !podeCriar()) {
+  <p class="cofrinhos__aviso" role="status">
+    Para criar um cofrinho, cadastre antes
+    @if (!selicAtual()) {
+      a <button mat-button type="button" (click)="abrirSelic()">taxa Selic</button>
+    }
+    @if (!selicAtual() && !bancos().length) {
+      e
+    }
+    @if (!bancos().length) {
+      um <button mat-button type="button" (click)="abrirBancos()">banco</button>
+    }
+  </p>
+}
+
+@if (cofrinhos().length) {
+  <p class="cofrinhos__total">
+    Total guardado <strong>{{ total() | currency }}</strong>
+  </p>
+  <div class="cofrinhos__grade">
+    @for (cofrinho of cofrinhos(); track cofrinho.id) {
+      <a class="cofrinhos__card" [routerLink]="['/cofrinhos', cofrinho.id]">
+        <span class="cofrinhos__nome">{{ cofrinho.nome }}</span>
+        <span class="cofrinhos__banco"
+          >{{ cofrinho.banco_nome }} · {{ cofrinho.percentual | number: '1.0-2' }}% do CDI</span
+        >
+        <span class="cofrinhos__saldo">{{ cofrinho.saldo_liquido | currency }}</span>
+        <span class="cofrinhos__rendeu">
+          Rendeu este mês <strong>{{ cofrinho.rendeu_no_mes | currency }}</strong>
+        </span>
+      </a>
+    }
+  </div>
+} @else if (carregado()) {
+  <p>Nenhum cofrinho ainda.</p>
+}

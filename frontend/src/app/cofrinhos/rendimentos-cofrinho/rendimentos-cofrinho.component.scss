@@ -1,0 +1,56 @@
+@use '../chips';
+
+:host {
+  display: block;
+  max-width: 720px;
+}
+
+.chips {
+  margin-top: 8px;
+}
+
+.rendimentos__percentual,
+.rendimentos__nota {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.rendimentos__titulo {
+  font: var(--mat-sys-headline-small);
+  margin: 8px 0 0;
+}
+
+.rendimentos__total {
+  display: block;
+  font: var(--mat-sys-display-small);
+}
+
+.rendimentos__quadro {
+  margin: 16px 0;
+  padding: 16px 24px;
+  border-radius: 16px;
+  background: var(--mat-sys-surface-container);
+
+  dl {
+    margin: 0;
+  }
+
+  div {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 6px 0;
+  }
+
+  dt,
+  dd {
+    margin: 0;
+  }
+
+  dd {
+    font-weight: 500;
+  }
+}
+
+.rendimentos__liquido dd {
+  color: #4caf8a;
+}

@@ -3,6 +3,8 @@ from rest_framework.routers import DefaultRouter
 
 from fatura_facil.views import (
     AvulsoViewSet,
+    BancoViewSet,
+    CofrinhoViewSet,
     CompraViewSet,
     CsrfView,
     FamiliaViewSet,
@@ -14,6 +16,7 @@ from fatura_facil.views import (
     MesViewSet,
     MeView,
     RecorrenteViewSet,
+    TaxaSelicViewSet,
 )
 
 app_name = "fatura_facil"
@@ -27,6 +30,9 @@ router.register("meses", MesViewSet, basename="mes")
 router.register("recorrentes", RecorrenteViewSet, basename="recorrente")
 router.register("avulsos", AvulsoViewSet, basename="avulso")
 router.register("familias", FamiliaViewSet, basename="familia")
+router.register("bancos", BancoViewSet, basename="banco")
+router.register("taxas-selic", TaxaSelicViewSet, basename="taxa-selic")
+router.register("cofrinhos", CofrinhoViewSet, basename="cofrinho")
 router.register("importacoes", ImportacaoViewSet, basename="importacao")
 
 urlpatterns = [

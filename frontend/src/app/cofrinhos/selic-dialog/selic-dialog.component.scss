@@ -1,0 +1,40 @@
+.selic {
+  min-width: min(560px, 85vw);
+}
+
+.selic__explicacao,
+.selic__dica {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.selic__tabela {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+
+  th,
+  td {
+    padding: 4px 8px;
+    text-align: left;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+}
+
+.selic__atual {
+  font-weight: 500;
+}
+
+.selic__nova {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 12px;
+
+  mat-form-field {
+    flex: 1 1 140px;
+  }
+}
+
+.selic__erro {
+  color: var(--mat-sys-error);
+}

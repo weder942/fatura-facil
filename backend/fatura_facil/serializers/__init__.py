@@ -1,5 +1,6 @@
 from fatura_facil.serializers.auth_serializer import *
 from fatura_facil.serializers.avulso_serializer import *
+from fatura_facil.serializers.cofrinho_serializer import *
 from fatura_facil.serializers.competencia_field import *
 from fatura_facil.serializers.compra_serializer import *
 from fatura_facil.serializers.familia_serializer import *

@@ -66,3 +66,26 @@ export function dividirEmParcelas(totalDaApi: string, n: number): string[] | nul
   const sobra = total - base * n;
   return [deCentavos(base + sobra), ...Array.from({ length: n - 1 }, () => deCentavos(base))];
 }
+
+/** Taxa em % digitada ("13,75", "102", "13.75") para a API ("13.75"). Null se inválida. */
+export function paraTaxaDaApi(digitado: string): string | null {
+  const texto = digitado.trim().replace(/%$/, '').trim().replace(',', '.');
+  return /^\d{1,4}(\.\d{1,2})?$/.test(texto) ? texto : null;
+}
+
+/** Soma valores da API com sinal ("-0.50", "12.30"), em centavos inteiros. */
+export function somarValores(valores: string[]): string {
+  const total = valores.reduce((soma, valor) => {
+    const negativo = valor.startsWith('-');
+    return soma + (negativo ? -1 : 1) * emCentavos(negativo ? valor.slice(1) : valor);
+  }, 0);
+  return `${total < 0 ? '-' : ''}${deCentavos(Math.abs(total))}`;
+}
+
+/** "12.30" → "-12.30" e vice-versa; zero continua zero. */
+export function negarValor(valor: string): string {
+  if (/^-?0+(\.0+)?$/.test(valor)) {
+    return valor.replace('-', '');
+  }
+  return valor.startsWith('-') ? valor.slice(1) : `-${valor}`;
+}

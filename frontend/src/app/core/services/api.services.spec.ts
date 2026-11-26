@@ -3,11 +3,14 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 
 import { AvulsoService } from './avulso.service';
+import { BancoService } from './banco.service';
+import { CofrinhoService } from './cofrinho.service';
 import { CompraService } from './compra.service';
 import { FamiliaService } from './familia.service';
 import { FonteService } from './fonte.service';
 import { MesService } from './mes.service';
 import { RecorrenteService } from './recorrente.service';
+import { TaxaSelicService } from './taxa-selic.service';
 
 describe('services da API', () => {
   let http: HttpTestingController;
@@ -159,5 +162,65 @@ describe('services da API', () => {
     );
     service.encerrar(9, '2027-03').subscribe();
     esperar('POST', '/api/familias/9/encerrar/', { a_partir_de: '2027-03' }).flush(null);
+  });
+
+  it('BancoService e TaxaSelicService chamam os cadastros', () => {
+    const bancos = TestBed.inject(BancoService);
+    const taxas = TestBed.inject(TaxaSelicService);
+    const taxa = { vigente_desde: '2026-09-18', selic: '13.75', cdi: null };
+
+    bancos.listar().subscribe();
+    esperar('GET', '/api/bancos/').flush([]);
+    bancos.criar('PicPay').subscribe();
+    esperar('POST', '/api/bancos/', { nome: 'PicPay' }).flush({});
+    bancos.atualizar(1, { ativo: false }).subscribe();
+    esperar('PATCH', '/api/bancos/1/', { ativo: false }).flush({});
+    bancos.excluir(1).subscribe();
+    esperar('DELETE', '/api/bancos/1/').flush(null);
+
+    taxas.listar().subscribe();
+    esperar('GET', '/api/taxas-selic/').flush([]);
+    taxas.salvar(taxa).subscribe();
+    esperar('POST', '/api/taxas-selic/', taxa).flush({});
+    taxas.excluir(2).subscribe();
+    esperar('DELETE', '/api/taxas-selic/2/').flush(null);
+  });
+
+  it('CofrinhoService chama os endpoints de cofrinhos', () => {
+    const service = TestBed.inject(CofrinhoService);
+    const novo = {
+      nome: 'Reserva',
+      banco: 1,
+      inicio: '2026-11-02',
+      saldo: '1000.00',
+      percentual: '102',
+    };
+    const movimento = { tipo: 'guardado' as const, data: '2026-11-26', informado: '10.00' };
+
+    service.listar().subscribe();
+    esperar('GET', '/api/cofrinhos/').flush([]);
+    service.obter(3).subscribe();
+    esperar('GET', '/api/cofrinhos/3/').flush({});
+    service.criar(novo).subscribe();
+    esperar('POST', '/api/cofrinhos/', novo).flush({});
+    service.atualizar(3, { nome: 'Viagem' }).subscribe();
+    esperar('PATCH', '/api/cofrinhos/3/', { nome: 'Viagem' }).flush({});
+    service.excluir(3).subscribe();
+    esperar('DELETE', '/api/cofrinhos/3/').flush(null);
+    service.definirPercentual(3, '105', '2026-11-20').subscribe();
+    esperar('POST', '/api/cofrinhos/3/percentual/', {
+      percentual: '105',
+      a_partir_de: '2026-11-20',
+    }).flush({});
+    service.movimentar(3, movimento).subscribe();
+    esperar('POST', '/api/cofrinhos/3/movimentos/', movimento).flush({});
+    service.excluirMovimento(3, 8).subscribe();
+    esperar('DELETE', '/api/cofrinhos/3/movimentos/8/').flush(null);
+    service.extrato(3).subscribe();
+    esperar('GET', '/api/cofrinhos/3/extrato/').flush([]);
+    service.extrato(3, { tipo: 'rendimento', limite: 5 }).subscribe();
+    esperar('GET', '/api/cofrinhos/3/extrato/?tipo=rendimento&limite=5').flush([]);
+    service.rendimentos(3).subscribe();
+    esperar('GET', '/api/cofrinhos/3/rendimentos/').flush([]);
   });
 });

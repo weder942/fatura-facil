@@ -1,0 +1,40 @@
+<h2 mat-dialog-title>{{ textos.titulo }} · {{ dados.cofrinho.nome }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="salvar()">
+  <mat-dialog-content class="form-movimento">
+    @if (dados.tipo !== 'guardado') {
+      <p class="form-movimento__saldo">
+        Saldo líquido hoje: <strong>{{ dados.cofrinho.saldo_liquido | currency }}</strong>
+      </p>
+    }
+
+    <mat-form-field>
+      <mat-label>Data</mat-label>
+      <input
+        matInput
+        type="date"
+        formControlName="data"
+        [min]="dados.cofrinho.inicio"
+        [max]="hoje"
+      />
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>{{ textos.valor }}</mat-label>
+      <input matInput formControlName="valor" inputmode="decimal" placeholder="0,00" />
+      <mat-hint>{{ textos.dica }}</mat-hint>
+      @if (form.controls.valor.invalid) {
+        <mat-error>Informe um valor, ex.: 1.234,56.</mat-error>
+      }
+    </mat-form-field>
+
+    @if (erro(); as mensagem) {
+      <p class="form-movimento__erro" role="alert">{{ mensagem }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" mat-dialog-close>Cancelar</button>
+    <button mat-flat-button type="submit" [disabled]="salvando()">{{ textos.titulo }}</button>
+  </mat-dialog-actions>
+</form>

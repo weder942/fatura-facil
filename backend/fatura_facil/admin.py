@@ -2,12 +2,17 @@ from django.contrib import admin
 
 from fatura_facil.models import (
     Avulso,
+    Banco,
+    Cofrinho,
     Compra,
     Familia,
     Fonte,
     Lancamento,
     MembroDaFamilia,
+    MovimentoDoCofrinho,
+    PercentualDoCofrinho,
     Recorrente,
+    TaxaSelic,
     ValorDoMes,
     ValorRecorrente,
 )
@@ -72,3 +77,31 @@ class MembroDaFamiliaInline(admin.TabularInline):
 class FamiliaAdmin(admin.ModelAdmin):
     list_display = ["nome", "fonte", "valor", "inicio", "ate", "gerado_ate"]
     inlines = [MembroDaFamiliaInline]
+
+
+@admin.register(Banco)
+class BancoAdmin(admin.ModelAdmin):
+    list_display = ["nome", "ativo"]
+
+
+@admin.register(TaxaSelic)
+class TaxaSelicAdmin(admin.ModelAdmin):
+    list_display = ["vigente_desde", "selic", "cdi"]
+
+
+class PercentualDoCofrinhoInline(admin.TabularInline):
+    model = PercentualDoCofrinho
+    extra = 0
+
+
+class MovimentoDoCofrinhoInline(admin.TabularInline):
+    model = MovimentoDoCofrinho
+    extra = 0
+    fields = ["data", "tipo", "informado", "valor", "liquido", "ir", "iof", "inicial"]
+    readonly_fields = fields
+
+
+@admin.register(Cofrinho)
+class CofrinhoAdmin(admin.ModelAdmin):
+    list_display = ["nome", "banco", "inicio", "rendimento_ate"]
+    inlines = [PercentualDoCofrinhoInline, MovimentoDoCofrinhoInline]

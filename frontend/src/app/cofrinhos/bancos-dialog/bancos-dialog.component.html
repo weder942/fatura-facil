@@ -1,0 +1,44 @@
+<h2 mat-dialog-title>Bancos</h2>
+
+<mat-dialog-content class="bancos">
+  <ul class="bancos__lista">
+    @for (banco of bancos(); track banco.id) {
+      <li [class.bancos__inativo]="!banco.ativo">
+        <span class="bancos__nome">{{ banco.nome }}</span>
+        <mat-checkbox [checked]="banco.ativo" (change)="alternar(banco)">Ativo</mat-checkbox>
+        <button
+          mat-icon-button
+          type="button"
+          (click)="excluir(banco)"
+          [attr.aria-label]="'Excluir ' + banco.nome"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </li>
+    } @empty {
+      <li>Nenhum banco cadastrado.</li>
+    }
+  </ul>
+
+  <form class="bancos__novo" (ngSubmit)="adicionar()">
+    <mat-form-field>
+      <mat-label>Novo banco</mat-label>
+      <input matInput [formControl]="nome" placeholder="Ex.: PicPay" />
+      @if (nome.hasError('required') && nome.touched) {
+        <mat-error>Informe o nome.</mat-error>
+      }
+    </mat-form-field>
+    <button mat-stroked-button type="submit">
+      <mat-icon>add</mat-icon>
+      Adicionar
+    </button>
+  </form>
+
+  @if (erro(); as mensagem) {
+    <p class="bancos__erro" role="alert">{{ mensagem }}</p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-flat-button type="button" [mat-dialog-close]="mudou()">Fechar</button>
+</mat-dialog-actions>

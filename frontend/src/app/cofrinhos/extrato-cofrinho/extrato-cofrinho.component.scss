@@ -1,0 +1,25 @@
+@use '../chips';
+
+:host {
+  display: block;
+  max-width: 720px;
+}
+
+.extrato__titulo {
+  font: var(--mat-sys-headline-small);
+}
+
+.extrato__saldo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.extrato__valor {
+  font: var(--mat-sys-display-small);
+}
+
+.extrato__subtitulo {
+  font: var(--mat-sys-title-large);
+  margin: 24px 0 12px;
+}

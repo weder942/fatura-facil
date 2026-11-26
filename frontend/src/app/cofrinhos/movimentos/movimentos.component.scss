@@ -1,0 +1,61 @@
+:host {
+  display: block;
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.movimentos__dia + .movimentos__dia {
+  margin-top: 8px;
+}
+
+.movimentos__rotulo {
+  font: var(--mat-sys-title-small);
+  margin: 8px 0 4px;
+  text-transform: capitalize;
+}
+
+.movimentos__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.movimentos__icone {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 12px;
+  background: var(--mat-sys-surface-container-high);
+}
+
+.movimentos__texto {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+
+  small {
+    color: var(--mat-sys-on-surface-variant);
+  }
+}
+
+.movimentos__valor {
+  font: var(--mat-sys-title-small);
+  white-space: nowrap;
+}
+
+.movimentos__valor--entrada {
+  color: #4caf8a;
+}
+
+.movimentos__vazio {
+  color: var(--mat-sys-on-surface-variant);
+}

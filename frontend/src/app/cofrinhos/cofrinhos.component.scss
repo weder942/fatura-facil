@@ -1,0 +1,74 @@
+.cofrinhos__cabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  h1 {
+    font: var(--mat-sys-headline-small);
+    margin: 0;
+  }
+}
+
+.cofrinhos__selic,
+.cofrinhos__banco {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.cofrinhos__selic {
+  margin: 4px 0 0;
+}
+
+.cofrinhos__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.cofrinhos__aviso {
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.cofrinhos__total {
+  font: var(--mat-sys-title-medium);
+}
+
+.cofrinhos__grade {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.cofrinhos__card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  border-radius: 16px;
+  background: var(--mat-sys-surface-container);
+  color: inherit;
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    background: var(--mat-sys-surface-container-high);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--mat-sys-primary);
+  }
+}
+
+.cofrinhos__nome {
+  font: var(--mat-sys-title-medium);
+}
+
+.cofrinhos__saldo {
+  font: var(--mat-sys-headline-medium);
+  margin-top: 8px;
+}
+
+.cofrinhos__rendeu strong {
+  color: #4caf8a;
+}

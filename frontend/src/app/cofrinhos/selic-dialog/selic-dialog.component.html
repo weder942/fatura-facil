@@ -1,0 +1,76 @@
+<h2 mat-dialog-title>Taxa Selic</h2>
+
+<mat-dialog-content class="selic">
+  <p class="selic__explicacao">
+    A Selic meta, definida pelo Copom. O CDI usado nos rendimentos é a Selic menos 0,10 ponto, a
+    menos que você informe outro.
+  </p>
+
+  <table class="selic__tabela">
+    <thead>
+      <tr>
+        <th>Desde</th>
+        <th>Selic</th>
+        <th>CDI</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (taxa of taxas(); track taxa.id; let atual = $first) {
+        <tr [class.selic__atual]="atual">
+          <td>{{ taxa.vigente_desde | date: 'dd/MM/yyyy' }}</td>
+          <td>{{ taxa.selic | number: '1.0-2' }}%</td>
+          <td>{{ taxa.cdi | number: '1.0-2' }}%</td>
+          <td>
+            <button
+              mat-icon-button
+              type="button"
+              (click)="excluir(taxa)"
+              [disabled]="salvando()"
+              [attr.aria-label]="'Excluir a taxa de ' + (taxa.vigente_desde | date: 'dd/MM/yyyy')"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </tr>
+      } @empty {
+        <tr>
+          <td colspan="4">Nenhuma taxa cadastrada.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+
+  <form class="selic__nova" [formGroup]="form" (ngSubmit)="adicionar()">
+    <mat-form-field>
+      <mat-label>Vigente desde</mat-label>
+      <input matInput type="date" formControlName="vigente_desde" />
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>Selic (% a.a.)</mat-label>
+      <input matInput formControlName="selic" inputmode="decimal" placeholder="13,75" />
+      @if (form.controls.selic.invalid) {
+        <mat-error>Ex.: 13,75.</mat-error>
+      }
+    </mat-form-field>
+    <mat-form-field>
+      <mat-label>CDI (opcional)</mat-label>
+      <input matInput formControlName="cdi" inputmode="decimal" placeholder="Selic − 0,10" />
+    </mat-form-field>
+    <button mat-stroked-button type="submit" [disabled]="salvando()">
+      <mat-icon>add</mat-icon>
+      Salvar
+    </button>
+  </form>
+  <p class="selic__dica">
+    Uma data que já tem taxa é corrigida. Os rendimentos dali em diante são refeitos.
+  </p>
+
+  @if (erro(); as mensagem) {
+    <p class="selic__erro" role="alert">{{ mensagem }}</p>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-flat-button type="button" [mat-dialog-close]="mudou()">Fechar</button>
+</mat-dialog-actions>

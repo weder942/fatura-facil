@@ -1,0 +1,49 @@
+@for (dia of dias(); track dia.data) {
+  <section class="movimentos__dia">
+    <h3 class="movimentos__rotulo">{{ dia.rotulo }}</h3>
+    <ul>
+      @for (movimento of dia.movimentos; track movimento.id) {
+        <li class="movimentos__item">
+          <span class="movimentos__icone" aria-hidden="true">
+            <mat-icon>{{ icones[movimento.tipo] }}</mat-icon>
+          </span>
+          <span class="movimentos__texto">
+            <span class="movimentos__titulo">{{ titulo(movimento) }}</span>
+            @switch (movimento.tipo) {
+              @case ('rendimento') {
+                <small>Bruto {{ movimento.valor | currency }}</small>
+              }
+              @case ('resgatado') {
+                <small>
+                  Saiu {{ movimento.valor.replace('-', '') | currency }} · IR
+                  {{ movimento.ir | currency }} · IOF {{ movimento.iof | currency }}
+                </small>
+              }
+              @case ('ajuste') {
+                <small>Saldo no banco: {{ movimento.informado | currency }}</small>
+              }
+            }
+          </span>
+          <span
+            class="movimentos__valor"
+            [class.movimentos__valor--entrada]="!valor(movimento).startsWith('-')"
+          >
+            {{ valor(movimento) | currency }}
+          </span>
+          @if (podeExcluir(movimento)) {
+            <button
+              mat-icon-button
+              type="button"
+              (click)="excluir.emit(movimento)"
+              [attr.aria-label]="'Excluir ' + titulo(movimento) + ' de ' + dia.rotulo"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          }
+        </li>
+      }
+    </ul>
+  </section>
+} @empty {
+  <p class="movimentos__vazio">Nenhum movimento.</p>
+}

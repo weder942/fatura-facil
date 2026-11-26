@@ -1,0 +1,38 @@
+.bancos {
+  min-width: min(400px, 80vw);
+}
+
+.bancos__lista {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--mat-sys-outline-variant);
+  }
+}
+
+.bancos__nome {
+  flex: 1;
+}
+
+.bancos__inativo .bancos__nome {
+  opacity: 0.6;
+}
+
+.bancos__novo {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+
+  mat-form-field {
+    flex: 1;
+  }
+}
+
+.bancos__erro {
+  color: var(--mat-sys-error);
+}

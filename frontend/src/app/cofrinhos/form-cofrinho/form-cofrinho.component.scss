@@ -1,0 +1,20 @@
+.form-cofrinho {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: min(440px, 80vw);
+}
+
+.form-cofrinho__linha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  mat-form-field {
+    flex: 1 1 180px;
+  }
+}
+
+.form-cofrinho__erro {
+  color: var(--mat-sys-error);
+}

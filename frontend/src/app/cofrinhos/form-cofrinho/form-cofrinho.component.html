@@ -1,0 +1,68 @@
+<h2 mat-dialog-title>{{ cofrinho ? 'Editar cofrinho' : 'Novo cofrinho' }}</h2>
+
+<form [formGroup]="form" (ngSubmit)="salvar()">
+  <mat-dialog-content class="form-cofrinho">
+    <mat-form-field>
+      <mat-label>Descrição</mat-label>
+      <input matInput formControlName="nome" placeholder="Ex.: Reserva de emergência" />
+      @if (form.controls.nome.hasError('required')) {
+        <mat-error>Informe a descrição.</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>Banco</mat-label>
+      <mat-select formControlName="banco">
+        @for (banco of bancos(); track banco.id) {
+          <mat-option [value]="banco.id">{{ banco.nome }}</mat-option>
+        }
+      </mat-select>
+      @if (form.controls.banco.hasError('required')) {
+        <mat-error>Escolha o banco.</mat-error>
+      }
+    </mat-form-field>
+
+    @if (!cofrinho) {
+      <div class="form-cofrinho__linha">
+        <mat-form-field>
+          <mat-label>Data de criação</mat-label>
+          <input matInput type="date" formControlName="inicio" [max]="hoje" />
+          <mat-hint>Os rendimentos contam a partir dela.</mat-hint>
+        </mat-form-field>
+        <mat-form-field>
+          <mat-label>Valor total atual (R$)</mat-label>
+          <input matInput formControlName="saldo" inputmode="decimal" placeholder="0,00" />
+          @if (form.controls.saldo.invalid) {
+            <mat-error>Informe um valor, ex.: 1.234,56.</mat-error>
+          }
+        </mat-form-field>
+      </div>
+    }
+
+    <div class="form-cofrinho__linha">
+      <mat-form-field>
+        <mat-label>Rendimento (% do CDI)</mat-label>
+        <input matInput formControlName="percentual" inputmode="decimal" placeholder="102" />
+        @if (form.controls.percentual.invalid) {
+          <mat-error>Informe o percentual, ex.: 102.</mat-error>
+        }
+      </mat-form-field>
+      @if (mudouPercentual()) {
+        <mat-form-field>
+          <mat-label>Novo percentual a partir de</mat-label>
+          <input matInput type="date" formControlName="a_partir_de" [min]="cofrinho!.inicio" />
+          <mat-hint>Os rendimentos dessa data em diante são refeitos.</mat-hint>
+        </mat-form-field>
+      }
+    </div>
+
+    @if (erro(); as mensagem) {
+      <p class="form-cofrinho__erro" role="alert">{{ mensagem }}</p>
+    }
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" mat-dialog-close>Cancelar</button>
+    <button mat-flat-button type="submit" [disabled]="salvando()">Salvar</button>
+  </mat-dialog-actions>
+</form>

@@ -89,13 +89,15 @@ Primeira instalação feita e validada assim em 2026-11-19.
 1. Na sua máquina, com tudo commitado e enviado (`git push`):
    ```bash
    cd frontend && nvm use && cd ..
-   scripts/publicar-frontend.sh      # só se o front mudou
+   scripts/publicar-frontend.sh      # depois do merge, no main; só se o front mudou
    ```
 2. No console Bash do PythonAnywhere:
    ```bash
    ~/fatura-facil/scripts/atualizar-servidor.sh
    ```
    Faz `git pull` dos dois clones, `pip install`, `migrate`, `collectstatic`, `check --deploy` e recarrega a aplicação.
+
+   Antes do `git pull`, confere se o build publicado em `frontend-build` saiu de um commit com o mesmo `frontend/` do código que vai subir (`scripts/verificar-build-do-frontend.sh`). Se o front mudou e o build não foi publicado, para sem mexer em nada e diz para rodar o `publicar-frontend.sh`. Para implantar mesmo assim: `SEM_CONFERIR_FRONT=1 atualizar-fatura`.
 
    Atalho (configurado uma vez no console do PythonAnywhere):
    ```bash

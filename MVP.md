@@ -181,6 +181,16 @@ Assinatura dividida em rodízio, como o Apple iCloud da família: todo mês um m
 - Mês com a mensalidade confirmada pela fatura não muda. Na importação, a mensalidade casa pelo valor e mantém a identificação de quem paga.
 - Encerrar no primeiro mês da família apaga a família (ela nunca chegou a ter um mês).
 
+### 4.2 Cofrinhos (2026-11-26)
+Dinheiro guardado em bancos rendendo um percentual do CDI, com liquidez diária (como os cofrinhos do PicPay). Aba própria, fora da visão mensal: guardar e resgatar não entram nos meses, por enquanto.
+- **Cadastros:** bancos (onde o dinheiro está) e a taxa Selic com histórico (cada taxa vale a partir de uma data). O CDI usado é a Selic menos 0,10 ponto, a menos que seja informado.
+- **Cofrinho:** descrição, banco, data de criação, valor total atual (vira o "saldo inicial") e % do CDI. O percentual também tem histórico: mudar vale a partir de uma data. Sem importação de histórico: o acompanhamento começa na data de criação.
+- **Movimentos informados:** guardado (o valor), resgatado (**o que caiu na conta**; o IR e o IOF retidos são calculados e somados ao que sai) e ajuste de saldo (o saldo que o banco mostra; a diferença entra no extrato). Com data, nunca no futuro.
+- **Rendimento:** gerado dia útil a dia útil (calendário nacional, com os feriados móveis) sobre o saldo do dia útil anterior, a taxa diária `((1 + CDI)^(1/252) − 1) × %CDI` — o percentual incide sobre a taxa de um dia, como na B3, não sobre a anual. Dinheiro guardado em fim de semana ou feriado só entra no dia útil seguinte.
+- **Sem tarefa agendada:** os rendimentos dos dias que passaram são gerados quando a aba é aberta. Tudo que tem data passada (movimento, Selic, percentual) refaz o extrato daquela data em diante; o cálculo é refeito desde o início em memória, que é barato.
+- **Impostos:** IR regressivo (22,5% até 180 dias, 20% até 360, 17,5% até 720, 15% depois) e IOF regressivo nos 30 primeiros dias, **por aporte** (cada guardado tem o seu prazo; o resgate consome os mais antigos primeiro). O saldo inicial conta como aporte na data de criação, então o IR estimado dele sai na pior faixa.
+- **O que a tela mostra:** o saldo líquido (resgatando tudo hoje), os rendimentos do extrato já sem o IR estimado (o app do PicPay parece fazer assim; os valores da simulação bateram com os do app), o extrato com os 5 últimos movimentos e o completo com filtros (Tudo, Guardado, Resgatado, Rendimentos, Ajustes), e o detalhe por mês e visão geral: bruto, IR, IOF e líquido. IR e IOF do mês são a variação da provisão mais o retido nos resgates, por isso o IOF de um aporte recente volta como "restituição" depois de 30 dias.
+
 ## API (rascunho)
 
 ```
@@ -198,6 +208,13 @@ POST   /api/importacoes/            # upload + prévia
 POST   /api/importacoes/{id}/confirmar/
 GET    /api/importacoes/{id}/faltas/
 GET    /api/backup/
+GET    /api/bancos/                 POST/PATCH/DELETE
+GET    /api/taxas-selic/            POST (mesma data corrige) / DELETE
+GET    /api/cofrinhos/              POST/PATCH/DELETE  (ler gera os rendimentos que faltam)
+POST   /api/cofrinhos/{id}/percentual/
+POST   /api/cofrinhos/{id}/movimentos/      DELETE .../movimentos/{mov}/
+GET    /api/cofrinhos/{id}/extrato/?tipo=&limite=
+GET    /api/cofrinhos/{id}/rendimentos/     # resumo por mês
 ```
 
 ## Modelo de dados (rascunho)

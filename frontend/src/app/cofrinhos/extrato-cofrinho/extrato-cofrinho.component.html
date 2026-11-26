@@ -1,0 +1,33 @@
+<a mat-button [routerLink]="['/cofrinhos', id]">
+  <mat-icon>arrow_back</mat-icon>
+  {{ cofrinho()?.nome ?? 'Cofrinho' }}
+</a>
+
+<h1 class="extrato__titulo">Histórico do cofrinho</h1>
+
+@if (cofrinho(); as cofrinho) {
+  <section class="extrato__saldo">
+    <span>Saldo guardado</span>
+    <strong class="extrato__valor">{{ cofrinho.saldo_liquido | currency }}</strong>
+    <span>
+      Já rendeu <strong>{{ cofrinho.ja_rendeu | currency }}</strong>
+    </span>
+  </section>
+}
+
+<h2 class="extrato__subtitulo">Movimentações</h2>
+<div class="chips" role="group" aria-label="Filtrar movimentações">
+  @for (opcao of filtros; track opcao.rotulo) {
+    <button
+      type="button"
+      class="chips__chip"
+      [class.chips__chip--ativo]="filtro() === opcao.tipo"
+      [attr.aria-pressed]="filtro() === opcao.tipo"
+      (click)="filtrar(opcao.tipo)"
+    >
+      {{ opcao.rotulo }}
+    </button>
+  }
+</div>
+
+<app-movimentos [movimentos]="movimentos()" [excluivel]="true" (excluir)="excluir($event)" />

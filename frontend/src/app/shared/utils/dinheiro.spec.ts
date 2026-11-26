@@ -2,9 +2,12 @@ import {
   deCentavos,
   dividirEmParcelas,
   emCentavos,
+  negarValor,
   paraCampo,
+  paraTaxaDaApi,
   paraValorComSinal,
   paraValorDaApi,
+  somarValores,
 } from './dinheiro';
 
 describe('dinheiro', () => {
@@ -58,5 +61,33 @@ describe('paraValorComSinal', () => {
     ['-', null],
   ])('%s → %s', (digitado, esperado) => {
     expect(paraValorComSinal(digitado)).toBe(esperado);
+  });
+});
+
+describe('paraTaxaDaApi', () => {
+  it.each([
+    ['13,75', '13.75'],
+    ['13.75', '13.75'],
+    ['102', '102'],
+    [' 105 % ', '105'],
+    ['abc', null],
+    ['1,234', null],
+  ])('%s → %s', (digitado, esperado) => {
+    expect(paraTaxaDaApi(digitado)).toBe(esperado);
+  });
+});
+
+describe('valores com sinal', () => {
+  it('soma em centavos', () => {
+    expect(somarValores(['12.30', '-0.50', '0.21'])).toBe('12.01');
+    expect(somarValores(['-0.50', '0.20'])).toBe('-0.30');
+    expect(somarValores([])).toBe('0.00');
+  });
+
+  it('nega', () => {
+    expect(negarValor('12.30')).toBe('-12.30');
+    expect(negarValor('-12.30')).toBe('12.30');
+    expect(negarValor('0.00')).toBe('0.00');
+    expect(negarValor('-0.00')).toBe('0.00');
   });
 });

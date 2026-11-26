@@ -1,0 +1,28 @@
+// Filtros em pílula, como os do app do banco (Tudo, Guardado...; meses).
+.chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.chips__chip {
+  flex: none;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-on-surface);
+  font: var(--mat-sys-label-large);
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--mat-sys-primary);
+    outline-offset: 2px;
+  }
+}
+
+.chips__chip--ativo {
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+}

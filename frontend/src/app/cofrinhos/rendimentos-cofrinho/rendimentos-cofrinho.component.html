@@ -1,0 +1,59 @@
+<a mat-button [routerLink]="['/cofrinhos', id]">
+  <mat-icon>arrow_back</mat-icon>
+  {{ cofrinho()?.nome ?? 'Cofrinho' }}
+</a>
+
+<div class="chips" role="group" aria-label="Escolher o mês">
+  @for (mes of meses(); track mes.mes) {
+    <button
+      type="button"
+      class="chips__chip"
+      [class.chips__chip--ativo]="selecionado() === mes.mes"
+      [attr.aria-pressed]="selecionado() === mes.mes"
+      (click)="selecionado.set(mes.mes)"
+    >
+      {{ rotuloDoMes(mes.mes) }}
+    </button>
+  }
+  <button
+    type="button"
+    class="chips__chip"
+    [class.chips__chip--ativo]="selecionado() === geral"
+    [attr.aria-pressed]="selecionado() === geral"
+    (click)="selecionado.set(geral)"
+  >
+    Visão geral
+  </button>
+</div>
+
+@if (resumo(); as resumo) {
+  @if (cofrinho(); as cofrinho) {
+    <p class="rendimentos__percentual">
+      {{ cofrinho.percentual | number: '1.0-2' }}% do CDI · desde
+      {{ cofrinho.inicio | date: 'dd/MM/yyyy' }}
+    </p>
+  }
+  <h1 class="rendimentos__titulo">{{ titulo() }}</h1>
+  <strong class="rendimentos__total">{{ resumo.liquido | currency }}</strong>
+
+  <section class="rendimentos__quadro">
+    <dl>
+      @for (linha of linhas(); track linha.rotulo) {
+        <div>
+          <dt>{{ linha.rotulo }}</dt>
+          <dd>{{ linha.valor | currency }}</dd>
+        </div>
+      }
+      <div class="rendimentos__liquido">
+        <dt>Rendimento líquido</dt>
+        <dd>{{ resumo.liquido | currency }}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <p class="rendimentos__nota">
+    IR e IOF são estimados: o que seria retido se tudo fosse resgatado no fim do mês, mais o que foi
+    retido nos resgates. O IOF de um aporte recente volta como restituição quando ele passa de 30
+    dias; o IR cai conforme o prazo (22,5% até 180 dias, 20% até 360, 17,5% até 720 e 15% depois).
+  </p>
+}

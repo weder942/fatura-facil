@@ -11,6 +11,13 @@ WSGI=/var/www/${USUARIO}_pythonanywhere_com_wsgi.py
 
 export DJANGO_SETTINGS_MODULE=config.settings.production
 
+git -C "$REPO" fetch -q
+git -C "$FRONT" fetch -q
+# Antes de mexer em qualquer coisa: o build do frontend acompanha o código?
+if [ -z "${SEM_CONFERIR_FRONT:-}" ]; then
+  "$REPO/scripts/verificar-build-do-frontend.sh" "$REPO" "$FRONT"
+fi
+
 git -C "$REPO" pull --ff-only
 git -C "$FRONT" pull --ff-only
 

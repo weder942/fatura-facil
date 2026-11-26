@@ -33,6 +33,36 @@ export const routes: Routes = [
           import('./recorrentes/recorrentes.component').then((m) => m.RecorrentesComponent),
         title: 'Recorrentes · Fatura Fácil',
       },
+      {
+        path: 'cofrinhos',
+        loadComponent: () =>
+          import('./cofrinhos/cofrinhos.component').then((m) => m.CofrinhosComponent),
+        title: 'Cofrinhos · Fatura Fácil',
+      },
+      {
+        path: 'cofrinhos/:id',
+        loadComponent: () =>
+          import('./cofrinhos/detalhe-cofrinho/detalhe-cofrinho.component').then(
+            (m) => m.DetalheCofrinhoComponent,
+          ),
+        title: 'Cofrinho · Fatura Fácil',
+      },
+      {
+        path: 'cofrinhos/:id/extrato',
+        loadComponent: () =>
+          import('./cofrinhos/extrato-cofrinho/extrato-cofrinho.component').then(
+            (m) => m.ExtratoCofrinhoComponent,
+          ),
+        title: 'Extrato do cofrinho · Fatura Fácil',
+      },
+      {
+        path: 'cofrinhos/:id/rendimentos',
+        loadComponent: () =>
+          import('./cofrinhos/rendimentos-cofrinho/rendimentos-cofrinho.component').then(
+            (m) => m.RendimentosCofrinhoComponent,
+          ),
+        title: 'Rendimentos do cofrinho · Fatura Fácil',
+      },
     ],
   },
   { path: '**', redirectTo: '' },

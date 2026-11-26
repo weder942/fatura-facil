@@ -1,0 +1,78 @@
+<a mat-button routerLink="/cofrinhos" class="detalhe__voltar">
+  <mat-icon>arrow_back</mat-icon>
+  Cofrinhos
+</a>
+
+@if (cofrinho(); as cofrinho) {
+  <header class="detalhe__cabecalho">
+    <div>
+      <h1>{{ cofrinho.nome }}</h1>
+      <p class="detalhe__sub">
+        {{ cofrinho.banco_nome }} · {{ cofrinho.percentual | number: '1.0-2' }}% do CDI · desde
+        {{ cofrinho.inicio | date: 'dd/MM/yyyy' }}
+      </p>
+    </div>
+    <button mat-icon-button type="button" [matMenuTriggerFor]="menu" aria-label="Mais opções">
+      <mat-icon>more_vert</mat-icon>
+    </button>
+    <mat-menu #menu="matMenu">
+      <button mat-menu-item type="button" (click)="editar(cofrinho)">
+        <mat-icon>edit</mat-icon>
+        Editar nome, banco ou % do CDI
+      </button>
+      <button mat-menu-item type="button" (click)="excluir(cofrinho)">
+        <mat-icon>delete</mat-icon>
+        Excluir cofrinho
+      </button>
+    </mat-menu>
+  </header>
+
+  <section class="detalhe__saldo">
+    <span>Saldo guardado</span>
+    <strong class="detalhe__valor">{{ cofrinho.saldo_liquido | currency }}</strong>
+    <span>
+      Já rendeu <strong>{{ cofrinho.ja_rendeu | currency }}</strong>
+    </span>
+    <small class="detalhe__sub">
+      Bruto {{ cofrinho.saldo_bruto | currency }} · se resgatar tudo hoje: IR
+      {{ cofrinho.ir_estimado | currency }} e IOF {{ cofrinho.iof_estimado | currency }}
+    </small>
+  </section>
+
+  <div class="detalhe__acoes">
+    <button mat-flat-button type="button" (click)="movimentar(cofrinho, 'guardado')">
+      <mat-icon>savings</mat-icon>
+      Guardar
+    </button>
+    <button mat-stroked-button type="button" (click)="movimentar(cofrinho, 'resgatado')">
+      <mat-icon>north_east</mat-icon>
+      Resgatar
+    </button>
+    <button mat-stroked-button type="button" (click)="movimentar(cofrinho, 'ajuste')">
+      <mat-icon>tune</mat-icon>
+      Ajustar saldo
+    </button>
+  </div>
+
+  <a class="detalhe__rendeu" [routerLink]="['/cofrinhos', cofrinho.id, 'rendimentos']">
+    <mat-icon aria-hidden="true">trending_up</mat-icon>
+    <span>
+      Rendeu este mês <strong>{{ cofrinho.rendeu_no_mes | currency }}</strong>
+    </span>
+    <span class="detalhe__link">Detalhar rendimentos</span>
+    <mat-icon aria-hidden="true">chevron_right</mat-icon>
+  </a>
+
+  <section class="detalhe__movimentos">
+    <h2>Últimos movimentos</h2>
+    <app-movimentos
+      [movimentos]="movimentos()"
+      [excluivel]="true"
+      (excluir)="excluirMovimento($event)"
+    />
+    <a mat-button [routerLink]="['/cofrinhos', cofrinho.id, 'extrato']">
+      Ver extrato completo
+      <mat-icon iconPositionEnd>chevron_right</mat-icon>
+    </a>
+  </section>
+}

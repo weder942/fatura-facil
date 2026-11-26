@@ -1,6 +1,6 @@
 import { AbstractControl, FormControl } from '@angular/forms';
 
-import { competenciaValida, valorComSinal } from './validadores';
+import { competenciaValida, taxaValida, valorComSinal, valorPositivo } from './validadores';
 
 describe('validadores', () => {
   it('valorComSinal aceita negativo e recusa texto', () => {
@@ -18,6 +18,24 @@ describe('validadores', () => {
     });
     expect(competenciaValida({ value: null } as unknown as AbstractControl<string>)).toEqual({
       competencia: true,
+    });
+  });
+
+  it('valorPositivo recusa negativo e texto', () => {
+    expect(valorPositivo(new FormControl('1.234,56', { nonNullable: true }))).toBeNull();
+    expect(valorPositivo(new FormControl('0', { nonNullable: true }))).toBeNull();
+    expect(valorPositivo(new FormControl('-1', { nonNullable: true }))).toEqual({ valor: true });
+    expect(valorPositivo({ value: null } as unknown as AbstractControl<string>)).toEqual({
+      valor: true,
+    });
+  });
+
+  it('taxaValida exige uma taxa maior que zero', () => {
+    expect(taxaValida(new FormControl('13,75', { nonNullable: true }))).toBeNull();
+    expect(taxaValida(new FormControl('0', { nonNullable: true }))).toEqual({ taxa: true });
+    expect(taxaValida(new FormControl('x', { nonNullable: true }))).toEqual({ taxa: true });
+    expect(taxaValida({ value: null } as unknown as AbstractControl<string>)).toEqual({
+      taxa: true,
     });
   });
 });
